@@ -26,14 +26,17 @@
 │   │   ├── productRoutes.js    # /api/products/*（公開）
 │   │   ├── cartRoutes.js       # /api/cart/*（雙模式認證）
 │   │   ├── orderRoutes.js      # /api/orders/*（需登入）
+│   │   ├── paymentRoutes.js    # /api/payments/*（綠界金流）
 │   │   ├── adminProductRoutes.js # /api/admin/products/*（需 admin）
 │   │   ├── adminOrderRoutes.js # /api/admin/orders/*（需 admin）
 │   │   └── pageRoutes.js       # /* EJS 頁面路由
-│   └── middleware/
-│       ├── authMiddleware.js    # JWT Bearer 驗證
-│       ├── adminMiddleware.js   # role=admin 檢查（須接在 authMiddleware 之後）
-│       ├── sessionMiddleware.js # X-Session-Id 標頭解析
-│       └── errorHandler.js     # 全域錯誤處理（Express error middleware）
+│   ├── middleware/
+│   │   ├── authMiddleware.js    # JWT Bearer 驗證
+│   │   ├── adminMiddleware.js   # role=admin 檢查（須接在 authMiddleware 之後）
+│   │   ├── sessionMiddleware.js # X-Session-Id 標頭解析
+│   │   └── errorHandler.js     # 全域錯誤處理（Express error middleware）
+│   └── utils/
+│       └── ecpay.js            # CheckMacValue 計算、表單參數組裝、QueryTradeInfo 查詢
 └── tests/
     ├── setup.js            # 共用輔助函式（getAdminToken, registerUser）
     ├── auth.test.js
@@ -78,7 +81,10 @@ server.js
 | POST | /api/orders | JWT | 從購物車建立訂單（含扣庫存 transaction） |
 | GET | /api/orders | JWT | 個人訂單列表 |
 | GET | /api/orders/:id | JWT | 訂單詳情 |
-| PATCH | /api/orders/:id/pay | JWT | 模擬付款（action: success/fail） |
+| PATCH | /api/orders/:id/pay | JWT | 模擬付款（action: success/fail，保留供測試） |
+| POST | /api/payments/ecpay/create-form | JWT | 產生綠界 AIO 表單參數（含 CheckMacValue） |
+| POST | /api/payments/ecpay/query | JWT | 向綠界查詢付款結果，更新訂單狀態 |
+| POST | /api/payments/ecpay/notify | 無 | 綠界 ReturnURL stub，回應 1\|OK |
 | GET | /api/admin/products | JWT + admin | 後台商品列表（分頁） |
 | POST | /api/admin/products | JWT + admin | 新增商品 |
 | PUT | /api/admin/products/:id | JWT + admin | 編輯商品 |
@@ -173,6 +179,8 @@ server.js
 | recipient_address | TEXT | NOT NULL |
 | total_amount | INTEGER | NOT NULL |
 | status | TEXT | NOT NULL DEFAULT 'pending', CHECK IN ('pending','paid','failed') |
+| merchant_trade_no | TEXT | 可為 NULL，綠界付款時寫入，格式：`EC` + 10位timestamp + 8碼UUID |
+| paid_at | TEXT | 可為 NULL，付款成功時由綠界 QueryTradeInfo 回傳的付款時間 |
 | created_at | TEXT | NOT NULL DEFAULT datetime('now') |
 
 ### order_items

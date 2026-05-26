@@ -8,11 +8,11 @@
 | 商品瀏覽 | ✅ 完成 |
 | 購物車（雙模式）| ✅ 完成 |
 | 訂單管理 | ✅ 完成 |
-| 模擬付款 | ✅ 完成 |
+| 模擬付款 | ✅ 完成（保留供測試用） |
 | 後台商品管理 | ✅ 完成 |
 | 後台訂單管理 | ✅ 完成 |
 | EJS 前台頁面 | ✅ 完成 |
-| ECPay 整合 | 🔲 未完成（.env 有相關變數） |
+| ECPay 綠界金流 | ✅ 完成 |
 
 ---
 
@@ -133,3 +133,72 @@ paid / failed → （不可再更新）
 ## 前台 EJS 頁面
 
 路由由 `src/routes/pageRoutes.js` 處理，使用 `views/layouts/front.ejs` 作為 layout。
+
+---
+
+## ECPay 綠界金流（/api/payments）
+
+### 技術選型
+採用 **AIO 全方位金流**（非站內付 2.0），流程最簡單，付款頁面由綠界提供，以瀏覽器表單 POST 跳轉。
+
+由於本專案運行於本機（localhost），無法接收綠界的 Server Notify（ReturnURL callback），因此付款結果改為由前端導回後**主動呼叫 QueryTradeInfo API** 查詢，取代被動接收 callback。
+
+### 付款流程
+1. 使用者在訂單詳情頁點擊「前往綠界付款」
+2. 前端呼叫 `POST /api/payments/ecpay/create-form`，取得簽章後的表單參數
+3. 後端產生唯一的 `MerchantTradeNo`，存入 `orders.merchant_trade_no`，計算 CheckMacValue
+4. 前端動態建立隱藏表單並 POST 至綠界 AIO 端點
+5. 使用者在綠界完成付款，綠界將瀏覽器導回 `ClientBackURL = /orders/:id?payment=return`
+6. 前端偵測到 `?payment=return` 後，自動呼叫 `POST /api/payments/ecpay/query`
+7. 後端以 `merchant_trade_no` 呼叫 QueryTradeInfo/V5 API 取得付款結果
+8. TradeStatus === '1' 時更新 `orders.status = 'paid'`，記錄 `paid_at`
+
+### API 端點
+
+| 方法 | 路徑 | 認證 | 說明 |
+|------|------|------|------|
+| POST | /api/payments/ecpay/create-form | JWT | 產生綠界表單參數（含 CheckMacValue） |
+| POST | /api/payments/ecpay/query | JWT | 向綠界查詢付款結果，更新訂單狀態 |
+| POST | /api/payments/ecpay/notify | 無 | ReturnURL stub，固定回應 `1\|OK` |
+
+### create-form 業務邏輯
+- 訂單必須屬於當前用戶且 `status === 'pending'`，否則回 400/403
+- `MerchantTradeNo` 格式：`EC` + Unix timestamp 後 10 碼 + UUID 前 8 碼大寫（共 20 字元）
+- `ItemName`：`商品名稱 x數量` 以 `#` 分隔，超過 400 字自動截斷（防止 CheckMacValue 失效）
+- `ChoosePayment` 固定為 `Credit`（信用卡）
+- `ClientBackURL` 設為 `/orders/:id?payment=return`
+
+### query 業務邏輯
+- 訂單無 `merchant_trade_no` 時回 400 PAYMENT_NOT_INITIATED
+- 呼叫綠界 QueryTradeInfo/V5，解析 URL-encoded 回應字串
+- `TradeStatus === '1'` 視為付款成功，更新訂單狀態為 `paid` 並記錄 `paid_at`
+- `TradeStatus !== '1'` 時訂單狀態維持 `pending`，不改寫為 `failed`（避免誤判）
+
+### CheckMacValue 計算（src/utils/ecpay.js）
+依照 ECPay AIO 規格（SHA256）：
+1. 移除 CheckMacValue 欄位（若存在）
+2. 參數 key 按字母序（case-insensitive）排序
+3. 組合字串：`HashKey={key}&k1=v1&...&HashIV={iv}`
+4. 對整串進行 PHP urlencode 等效編碼（空格→`+`，`!~*'()` 補充編碼）
+5. 全部轉小寫
+6. 套用 .NET 字元替換（`%21→!`, `%2a→*`, `%28→(`, `%29→)` 等 7 組）
+7. SHA256 雜湊 → 轉大寫 hex
+
+### 錯誤碼
+| 錯誤碼 | 情境 |
+|--------|------|
+| VALIDATION_ERROR | 缺少 orderId |
+| NOT_FOUND | 訂單不存在 |
+| FORBIDDEN | 訂單不屬於當前用戶 |
+| INVALID_STATUS | 訂單非 pending 狀態 |
+| PAYMENT_NOT_INITIATED | 尚未建立付款（無 merchant_trade_no） |
+| ECPAY_ERROR | 呼叫綠界 API 失敗 |
+
+### 環境變數
+| 變數 | 說明 | 測試值 |
+|------|------|--------|
+| ECPAY_MERCHANT_ID | 特店編號 | `3002607` |
+| ECPAY_HASH_KEY | 加密金鑰 | `pwFHCqoQZGmho4w6` |
+| ECPAY_HASH_IV | 加密向量 | `EkRm7iFT261dpevs` |
+| ECPAY_ENV | 環境切換 | `staging`（正式改 `production`） |
+| BASE_URL | 本機或部署網址（用於 ReturnURL / ClientBackURL） | `http://localhost:3001` |
