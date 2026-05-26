@@ -8,7 +8,14 @@
   <template v-else-if="order">
     <!-- Payment Result Alert -->
     <div
-      v-if="paymentResult && paymentMessages[paymentResult]"
+      v-if="queryingPayment"
+      class="rounded-xl p-4 mb-6 text-sm bg-gray-50 text-gray-500 border border-gray-100 flex items-center gap-2"
+    >
+      <div class="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
+      確認付款結果中...
+    </div>
+    <div
+      v-else-if="paymentResult && paymentMessages[paymentResult]"
       class="rounded-xl p-4 mb-6 text-sm"
       :class="paymentMessages[paymentResult].cls"
     >
@@ -70,21 +77,15 @@
       </table>
     </div>
 
-    <!-- Payment Buttons -->
+    <!-- Payment Button -->
     <div v-if="order.status === 'pending'" class="flex gap-4">
       <button
-        @click="handlePaySuccess"
+        @click="initiateEcpayPayment"
         :disabled="paying"
-        class="bg-sage text-white px-8 py-3 rounded-full text-sm font-medium hover:bg-sage/90 transition-colors disabled:opacity-50"
+        class="bg-rose-primary text-white px-8 py-3 rounded-full text-sm font-medium hover:bg-rose-primary/90 transition-colors disabled:opacity-50 flex items-center gap-2"
       >
-        {{ paying ? '處理中...' : '付款成功' }}
-      </button>
-      <button
-        @click="handlePayFail"
-        :disabled="paying"
-        class="bg-red-500 text-white px-8 py-3 rounded-full text-sm font-medium hover:bg-red-600 transition-colors disabled:opacity-50"
-      >
-        {{ paying ? '處理中...' : '付款失敗' }}
+        <span v-if="paying" class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+        {{ paying ? '跳轉中...' : '前往綠界付款' }}
       </button>
     </div>
   </template>

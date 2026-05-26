@@ -68,6 +68,13 @@ function initializeDatabase() {
     );
   `);
 
+  // Add payment columns if they don't exist (idempotent migration)
+  const orderCols = db.prepare('PRAGMA table_info(orders)').all().map(c => c.name);
+  if (!orderCols.includes('merchant_trade_no'))
+    db.prepare('ALTER TABLE orders ADD COLUMN merchant_trade_no TEXT').run();
+  if (!orderCols.includes('paid_at'))
+    db.prepare('ALTER TABLE orders ADD COLUMN paid_at TEXT').run();
+
   // Seed data
   seedAdminUser();
   seedProducts();
