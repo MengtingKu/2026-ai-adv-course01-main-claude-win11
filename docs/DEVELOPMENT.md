@@ -49,12 +49,10 @@
 | `ADMIN_EMAIL` | Seed admin 帳號 | 否 | admin@hexschool.com |
 | `ADMIN_PASSWORD` | Seed admin 密碼 | 否 | 12345678 |
 | `NODE_ENV` | 執行環境 | 否 | 無（`test` 時 bcrypt rounds=1） |
-| `ECPAY_MERCHANT_ID` | 綠界商店代號 | 否（未整合） | 3002607 |
-| `ECPAY_HASH_KEY` | 綠界 HashKey | 否（未整合） | （staging 測試值） |
-| `ECPAY_HASH_IV` | 綠界 HashIV | 否（未整合） | （staging 測試值） |
-| `ECPAY_ENV` | 綠界環境 | 否（未整合） | staging |
-
-> ECPay 相關變數目前已在 .env.example 中定義但尚未整合至業務邏輯。
+| `ECPAY_MERCHANT_ID` | 綠界商店代號 | 否 | `3002607`（staging） |
+| `ECPAY_HASH_KEY` | 綠界 HashKey | 否 | staging 測試值 |
+| `ECPAY_HASH_IV` | 綠界 HashIV | 否 | staging 測試值 |
+| `ECPAY_ENV` | 綠界環境（`staging` / `production`） | 否 | `staging` |
 
 ## JSDoc 格式說明
 

@@ -28,8 +28,9 @@ Thumbs.db
 .vscode/
 .idea/
 
-# Claude Code tool settings
-.claude/
+# Claude Code tool settings (track .claude/ but exclude user-specific files)
+.claude/settings.local.json
+.claude/*.local.json
 
 # Logs
 *.log
@@ -42,5 +43,4 @@ coverage/
 *.tmp
 *.swp
 
-.claude/*.local.json
 public/css/output.css
