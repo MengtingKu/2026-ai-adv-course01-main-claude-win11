@@ -11,7 +11,7 @@
 | 模擬付款 | ✅ 完成（保留供測試用） |
 | 後台商品管理 | ✅ 完成 |
 | 後台訂單管理 | ✅ 完成 |
-| EJS 前台頁面 | ✅ 完成 |
+| EJS 前台頁面（Editorial Luxury UI）| ✅ 完成 |
 | ECPay 綠界金流 | ✅ 完成 |
 
 ---
@@ -130,9 +130,25 @@ paid / failed → （不可再更新）
 
 ---
 
-## 前台 EJS 頁面
+## 前台 EJS 頁面（Editorial Luxury UI）
 
 路由由 `src/routes/pageRoutes.js` 處理，使用 `views/layouts/front.ejs` 作為 layout。
+
+### 設計系統
+- **調色盤**：bg-base `#E9E7E2`、bg-dark `#141210`、cherry `#D6435B`、ink-900 `#1A1917`
+- **字型**：Cormorant Garamond（display，大標題）+ Inter Tight + Noto Sans TC（UI）
+- **Token**：定義於 `public/css/input.css` 的 Tailwind v4 `@theme {}` 區塊
+
+### 頁面清單
+| 路由 | EJS 頁面 | pageScript | fullWidth |
+|------|----------|------------|-----------|
+| `/` | `index.ejs` | `index` | ✅ |
+| `/products/:id` | `product-detail.ejs` | `product-detail` | — |
+| `/cart` | `cart.ejs` | `cart` | — |
+| `/checkout` | `checkout.ejs` | `checkout` | — |
+| `/login` | `login.ejs` | `login` | — |
+| `/orders` | `orders.ejs` | `orders` | — |
+| `/orders/:id` | `order-detail.ejs` | `order-detail` | — |
 
 ---
 
