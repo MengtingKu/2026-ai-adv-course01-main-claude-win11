@@ -6,6 +6,7 @@ public/css/output.css
 
 # Windows WSL Zone.Identifier files
 *:Zone.Identifier
+*Zone.Identifier
 
 
 # SQLite database files
@@ -44,3 +45,7 @@ coverage/
 *.swp
 
 public/css/output.css
+
+# Playwright / E2E 測試一次性產物（snapshot、console log、測試截圖），不入版控
+.playwright-mcp/
+docs/e2e-screenshots/

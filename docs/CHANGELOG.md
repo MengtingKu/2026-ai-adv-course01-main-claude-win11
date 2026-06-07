@@ -2,6 +2,40 @@
 
 ## [未發布]
 
+## [1.2.0] - 2026-06-06
+
+### 新增
+- **Editorial Luxury 設計系統**（`public/css/input.css`）
+  - Tailwind CSS v4 `@theme {}` 自訂 token：bg-base/raised/paper/dark、ink-900/600/400、cherry/cherry-press、success/warning/error、line-strong/soft
+  - 字型系統：Cormorant Garamond（display，義大利體/字重 300–600）+ Inter Tight + Noto Sans TC（UI）
+  - 工具類：`.font-display`、`.font-ui`、`.text-overline`（全大寫 + 字間距）、`.transition-base`
+- **首頁（`views/pages/index.ejs`）** — 全新 Editorial 設計
+  - 分割式英雄區塊：左側深色面板（Cormorant Garamond 主題、cherry CTA）+ 右側全出血花卉圖片
+  - Cherry 橫幅跑馬燈
+  - 非對稱精選商品格（大卡 + 2 疊 + 2 底部）—— Vue.js `products.slice()` 動態渲染
+  - 深色場合選擇區塊（4 格，帶裝飾性大數字）
+  - 品牌故事左圖右文分割
+  - 完整商品方格（3 欄）+ 分頁，所有 Vue.js binding 完整保留
+- **`front.ejs` layout** 新增 `fullWidth` 模式，跳過 `max-w-7xl` 容器限制（供首頁等全出血頁面使用）
+
+### 變更
+- **全域 partials 重刻**
+  - `header.ejs`：深色 sticky 導覽列（bg-bg-dark 72px）、Cormorant + BLOOM overline logo、cherry 購物車徽章、所有 JS hook 保留
+  - `footer.ejs`：ink-900 深色底，4 欄連結 + 電子報訂閱
+  - `head.ejs`：標題格式改為 `— 花漾生活 BLOOM`，載入 Cormorant Garamond / Inter Tight / Noto Sans TC 字型
+- **6 個前台頁面重刻**（保留所有 Vue.js 資料綁定與事件處理）
+  - `product-detail.ejs`：4:5 比例商品圖 + serif 標題 + cherry 價格 + 極簡數量步進器
+  - `cart.ejs`：欄位格線購物車 + 右側摘要面板 + 無圓角 confirm 對話框
+  - `checkout.ejs`：左側表單 + 右側 sticky 訂單摘要
+  - `login.ejs`：居中卡片、底線 tab 切換（cherry 下劃線指示器）
+  - `orders.ejs`：表格式訂單列表 + 狀態徽章
+  - `order-detail.ejs`：兩欄配置（訂單資訊 + 商品明細表）+ ECPay 按鈕
+  - `404.ejs`：水印式大字 + serif 標題 + cherry 分隔線
+
+### 維護
+- 移除所有 Zone.Identifier 備用資料流檔案（58 個，NTFS Windows 下載產生）
+- `.gitignore` 新增 `*Zone.Identifier`（無前置冒號）以補充捕捉 Unicode 私用字元版本（U+F03A）
+
 ## [1.1.0] - 2026-05-26
 
 ### 新增

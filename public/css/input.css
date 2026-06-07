@@ -1,21 +1,47 @@
 @import "tailwindcss";
 
 @theme {
-  --color-rose-primary: #C4727F;
-  --color-rose-dark: #A85B67;
-  --color-rose-light: #E8A5AE;
-  --color-apricot: #D4956A;
-  --color-sage: #7EA584;
-  --color-cream: #FBF8F4;
-  --color-blush: #FFF1EC;
-  --color-rose-bg: #FDEAE4;
-  --color-text-primary: #2C2A28;
-  --color-text-secondary: #6B6560;
-  --color-text-muted: #9A948E;
+  /* ── Color tokens ── */
+  --color-bg-base:     #E9E7E2;
+  --color-bg-raised:   #F4F2EE;
+  --color-bg-paper:    #FCFBF9;
+  --color-bg-dark:     #141210;
+  --color-ink-900:     #1A1917;
+  --color-ink-600:     #56524C;
+  --color-ink-400:     #8C877F;
+  --color-line-strong: #1A1917;
+  --color-line-soft:   #D6D2CA;
+  --color-cherry:      #D6435B;
+  --color-cherry-press:#B5324A;
+  --color-success:     #3F7A55;
+  --color-warning:     #C07A2C;
+  --color-error:       #C23B3B;
+
+  /* ── Font families ── */
+  --font-display: 'Cormorant Garamond', serif;
+  --font-ui:      'Inter Tight', 'Noto Sans TC', sans-serif;
 }
 
+/* ── Base ── */
 body {
-  font-family: 'Noto Sans TC', sans-serif;
-  background-color: var(--color-cream);
-  color: var(--color-text-primary);
+  font-family: var(--font-ui);
+  background-color: var(--color-bg-base);
+  color: var(--color-ink-900);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
+
+/* ── Typography helpers ── */
+.font-display { font-family: var(--font-display); }
+.font-ui      { font-family: var(--font-ui); }
+
+/* ── Overline utility ── */
+.text-overline {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+/* ── Transition defaults ── */
+.transition-base { transition: all 160ms ease-out; }

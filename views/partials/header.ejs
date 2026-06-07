@@ -1,26 +1,56 @@
-<header class="sticky top-0 z-50 bg-white shadow-sm border-b border-rose-bg">
-  <div class="max-w-7xl mx-auto flex items-center justify-between px-4 h-16">
-    <a href="/" class="text-xl font-bold text-rose-primary" style="font-family: 'Noto Serif TC', serif;">
-      花漾生活
+<header class="sticky top-0 z-50 bg-bg-dark border-b border-white/10">
+  <div class="max-w-screen-xl mx-auto flex items-center justify-between px-4 md:px-12 h-[72px]">
+
+    <!-- Logo -->
+    <a href="/" class="flex flex-col gap-0.5 leading-none group">
+      <span class="font-display text-[22px] font-semibold text-white tracking-tight group-hover:text-white/80 transition-colors duration-150">花漾生活</span>
+      <span class="font-ui text-[9px] font-medium tracking-[3px] text-ink-400 uppercase">BLOOM</span>
     </a>
 
-    <nav class="flex items-center gap-6 text-sm text-text-secondary">
-      <a href="/" class="hover:text-rose-primary transition-colors">商品列表</a>
-      <a href="/cart" class="hover:text-rose-primary transition-colors relative">
-        購物車
-        <span
-          id="cart-badge"
-          class="absolute -top-2 -right-4 bg-rose-primary text-white text-xs rounded-full w-5 h-5 items-center justify-center"
-          style="display: none;"
-        ></span>
-      </a>
-      <a id="orders-link" href="/orders" class="hover:text-rose-primary transition-colors" style="display: none;">
-        我的訂單
-      </a>
+    <!-- Nav Links -->
+    <nav class="hidden md:flex items-center gap-10">
+      <a href="/" class="font-ui text-[13px] tracking-[1px] text-white/50 hover:text-white transition-colors duration-150">商品</a>
+      <a href="/" class="font-ui text-[13px] tracking-[1px] text-white/50 hover:text-white transition-colors duration-150">場合</a>
+      <a href="/" class="font-ui text-[13px] tracking-[1px] text-white/50 hover:text-white transition-colors duration-150">關於</a>
     </nav>
 
-    <div id="auth-nav" class="flex items-center gap-4 text-sm">
-      <a href="/login" class="bg-rose-primary text-white px-4 py-1.5 rounded-full hover:bg-rose-dark transition-colors">登入</a>
+    <!-- Actions -->
+    <div class="flex items-center gap-5">
+      <!-- Search -->
+      <button class="text-white/50 hover:text-white transition-colors duration-150">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+      </button>
+
+      <!-- Cart -->
+      <a href="/cart" class="relative text-white hover:text-white/70 transition-colors duration-150">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+          <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+        </svg>
+        <span
+          id="cart-badge"
+          class="absolute -top-1.5 -right-2 bg-cherry text-white text-[9px] font-bold w-[15px] h-[15px] rounded-full flex items-center justify-center leading-none"
+          style="display:none;"
+        ></span>
+      </a>
+
+      <!-- Orders (logged-in only) -->
+      <a id="orders-link" href="/orders"
+         class="font-ui text-[13px] tracking-[0.5px] text-white/50 hover:text-white transition-colors duration-150"
+         style="display:none;">
+        訂單
+      </a>
+
+      <!-- Auth -->
+      <div id="auth-nav">
+        <a href="/login"
+           class="font-ui text-[13px] border border-white/20 text-white px-4 h-9 flex items-center hover:border-white/50 hover:bg-white/5 transition-all duration-150">
+          登入
+        </a>
+      </div>
     </div>
+
   </div>
 </header>
