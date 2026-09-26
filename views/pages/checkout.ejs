@@ -59,6 +59,46 @@
           </div>
         </div>
       </div>
+
+      <div class="border border-line-soft bg-bg-paper p-5 md:p-8 mt-6">
+        <h2 class="font-ui text-overline text-ink-400 mb-6">配送方式</h2>
+
+        <div class="space-y-3 mb-6">
+          <label class="flex items-center justify-between gap-4 border border-line-soft bg-white px-4 h-12 cursor-pointer"
+                 :class="{ 'border-ink-900': form.shippingMethod === 'home_delivery' }">
+            <span class="flex items-center gap-3">
+              <input type="radio" value="home_delivery" v-model="form.shippingMethod" class="accent-cherry" />
+              <span class="font-ui text-[14px] text-ink-900">宅配到府</span>
+            </span>
+            <span class="font-ui text-[12px] text-ink-600">NT$ 120・滿 NT$ 1,500 免運</span>
+          </label>
+          <label class="flex items-center justify-between gap-4 border border-line-soft bg-white px-4 h-12 cursor-pointer"
+                 :class="{ 'border-ink-900': form.shippingMethod === 'convenience_store' }">
+            <span class="flex items-center gap-3">
+              <input type="radio" value="convenience_store" v-model="form.shippingMethod" class="accent-cherry" />
+              <span class="font-ui text-[14px] text-ink-900">超商取貨</span>
+            </span>
+            <span class="font-ui text-[12px] text-ink-600">NT$ 60</span>
+          </label>
+        </div>
+
+        <div class="space-y-3">
+          <label class="flex items-center justify-between gap-4 cursor-pointer">
+            <span class="flex items-center gap-3">
+              <input type="checkbox" v-model="form.isRemoteArea" class="accent-cherry" />
+              <span class="font-ui text-[14px] text-ink-900">偏遠地區</span>
+            </span>
+            <span class="font-ui text-[12px] text-ink-600">+ NT$ 200</span>
+          </label>
+          <label class="flex items-center justify-between gap-4 cursor-pointer">
+            <span class="flex items-center gap-3">
+              <input type="checkbox" v-model="form.isUrgent" class="accent-cherry" />
+              <span class="font-ui text-[14px] text-ink-900">當日急件</span>
+            </span>
+            <span class="font-ui text-[12px] text-ink-600">+ NT$ 250</span>
+          </label>
+        </div>
+      </div>
     </div>
 
     <!-- Right: Summary -->
@@ -81,16 +121,26 @@
             <span class="font-ui text-[13px] text-ink-600">商品小計</span>
             <span class="font-ui text-[13px] text-ink-900">NT$ {{ cartTotal.toLocaleString() }}</span>
           </div>
-          <div class="flex justify-between">
-            <span class="font-ui text-[13px] text-ink-600">運費</span>
-            <span class="font-ui text-[13px] text-ink-900">{{ cartTotal >= 500 ? '免運' : 'NT$ 150' }}</span>
-          </div>
+          <template v-if="quote">
+            <div class="flex justify-between">
+              <span class="font-ui text-[13px] text-ink-600">{{ quote.shipping.method === 'home_delivery' ? '宅配運費' : '超商取貨' }}</span>
+              <span class="font-ui text-[13px] text-ink-900">{{ quote.shipping.freeShippingApplied ? '免運' : 'NT$ ' + quote.shipping.baseFee.toLocaleString() }}</span>
+            </div>
+            <div v-if="quote.shipping.remoteAreaSurcharge" class="flex justify-between">
+              <span class="font-ui text-[13px] text-ink-600">偏遠地區附加費</span>
+              <span class="font-ui text-[13px] text-ink-900">NT$ {{ quote.shipping.remoteAreaSurcharge.toLocaleString() }}</span>
+            </div>
+            <div v-if="quote.shipping.urgentSurcharge" class="flex justify-between">
+              <span class="font-ui text-[13px] text-ink-600">當日急件附加費</span>
+              <span class="font-ui text-[13px] text-ink-900">NT$ {{ quote.shipping.urgentSurcharge.toLocaleString() }}</span>
+            </div>
+          </template>
         </div>
 
         <div class="border-t border-line-soft pt-4 flex justify-between items-center mb-6">
           <span class="font-ui text-[14px] font-medium text-ink-900">總計</span>
           <span class="font-display text-[24px] font-medium text-cherry">
-            NT$ {{ (cartTotal + (cartTotal >= 500 ? 0 : 150)).toLocaleString() }}
+            NT$ {{ (quote ? quote.total_amount : cartTotal).toLocaleString() }}
           </span>
         </div>
 

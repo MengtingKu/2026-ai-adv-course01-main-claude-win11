@@ -2,6 +2,38 @@
 
 ## [未發布]
 
+## [1.4.0] - 2026-09-26
+
+### 新增
+- **測試指令**：`test:unit`、`test:integration`、`test:e2e`、`postman`
+- `tests/integration/checkout.test.js`：結帳流程整合測試（訂單/品項寫入、運費、總額、扣庫存、清空購物車、失敗時 rollback 不扣庫存）
+- `tests/e2e/checkout-webatm.spec.js` + `playwright.config.js`：Playwright E2E，登入 → 結帳 → 綠界網路 ATM（台灣土地銀行）付款 → 返回商店驗證已付款，截圖存於 `tests/e2e/screenshots/`
+- `scripts/generate-postman.js`：openapi.json → `postman/flower-shop.postman_collection.json`（`{{baseUrl}}`、`token`、`sessionId` 變數，登入自動存 JWT，Bearer 自動套用）
+- 環境變數 `DB_PATH`、`ECPAY_CHOOSE_PAYMENT`、`E2E_BASE_URL`
+
+### 變更
+- Vitest 改用記憶體 SQLite（`DB_PATH=':memory:'`），測試不再寫入 `database.sqlite`
+- `tests/shipping.test.js` 移至 `tests/unit/shipping.test.js`
+- 綠界 `ChoosePayment` 由固定 `Credit` 改為預設 `ALL`（可選網路 ATM 等付款方式）
+- devDependencies 新增 `@playwright/test`、`openapi-to-postmanv2`
+
+## [1.3.0] - 2026-09-26
+
+### 新增
+- **Shipping 運費模組**（`src/utils/shipping.js`）
+  - 宅配基本運費 120 元，商品小計滿 1,500 元免基本運費
+  - 超商取貨 60 元（非基本運費，不適用滿額免運）
+  - 偏遠地區 +200 元、當日急件 +250 元（附加費可疊加，不因免運減免）
+- `POST /api/orders/shipping-quote`：依購物車試算運費與訂單總額
+- `tests/shipping.test.js`：Shipping 模組單元測試；`tests/orders.test.js` 新增運費 API 測試
+- 產出 `openapi.json`（新增 `ShippingOptions`、`ShippingBreakdown` schema）
+
+### 變更
+- `POST /api/orders` 接受 `shippingMethod`、`isRemoteArea`、`isUrgent`（皆選填，預設一般宅配）；`total_amount` 改為商品小計 + 運費，回應新增 `subtotal`、`shipping_fee`、`shipping`
+- `orders` 資料表新增欄位（啟動時自動 ALTER，冪等）：`subtotal`、`shipping_fee`、`shipping_method`、`is_remote_area`、`is_urgent`
+- 結帳頁新增配送方式與附加選項，運費改由後端試算（移除前端寫死的「滿 500 免運 / 運費 150」）
+- 訂單詳情頁顯示商品小計與運費明細
+
 ## [1.2.0] - 2026-06-06
 
 ### 新增

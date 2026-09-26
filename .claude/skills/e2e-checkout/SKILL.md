@@ -58,8 +58,8 @@ user-invocable: true
    📸 `step2-order-created.png`
 
 6. **前往綠界**：點「前往綠界付款」→ 進入 payment-stage.ecpay.com.tw 信用卡頁。
-   （ChoosePayment 硬編 `Credit`（`src/utils/ecpay.js:72`），故頁面只有信用卡，無 ATM。
-   若要測 ATM 需先改該欄位為 `'ATM'`/`'ALL'`，測後還原。）
+   （ChoosePayment 預設 `ALL`，頁面左側可切換付款方式；本流程選「信用卡」。
+   網路 ATM 流程已自動化於 `npm run test:e2e`（tests/e2e/checkout-webatm.spec.js）。）
 
 7. **逐字鍵入信用卡資料**（用欄位 id，全部 `slowly:true`）：
    - `#CCpart1`=4311　`#CCpart2`=9522　`#CCpart3`=2222　`#CCpart4`=2222
@@ -92,6 +92,6 @@ user-invocable: true
   node -e "require('dotenv').config(); require('./src/utils/ecpay').queryTradeInfo('<MerchantTradeNo>').then(r=>console.log(r))"
   ```
   `TradeStatus:'1'` 才是已付款；`'0'` 為訂單成立未付款。
-- **綠界頁無 ATM**：預期行為（ChoosePayment=Credit），見步驟 6。
+- **綠界頁無 ATM**：伺服器設定了 `ECPAY_CHOOSE_PAYMENT=Credit`，移除或改為 `ALL` 後重啟。
 - **截圖 File access denied**：用了相對路徑。改專案絕對路徑（見前置）。
 - **連線被拒**：伺服器未啟動，回步驟 1。

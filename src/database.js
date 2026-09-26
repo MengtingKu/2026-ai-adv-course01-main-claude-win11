@@ -3,7 +3,9 @@ const path = require("path");
 const bcrypt = require("bcrypt");
 const { v4: uuidv4 } = require("uuid");
 
-const dbPath = path.join(__dirname, "..", "database.sqlite");
+// DB_PATH 可指定其他 SQLite 檔或 ":memory:"（測試用），預設為專案根目錄的 database.sqlite
+const dbPath =
+  process.env.DB_PATH || path.join(__dirname, "..", "database.sqlite");
 const db = new Database(dbPath);
 
 // Enable WAL mode for better performance
@@ -77,6 +79,24 @@ function initializeDatabase() {
     db.prepare("ALTER TABLE orders ADD COLUMN merchant_trade_no TEXT").run();
   if (!orderCols.includes("paid_at"))
     db.prepare("ALTER TABLE orders ADD COLUMN paid_at TEXT").run();
+
+  // Add shipping columns if they don't exist (idempotent migration)
+  if (!orderCols.includes("subtotal"))
+    db.prepare("ALTER TABLE orders ADD COLUMN subtotal INTEGER").run();
+  if (!orderCols.includes("shipping_fee"))
+    db.prepare(
+      "ALTER TABLE orders ADD COLUMN shipping_fee INTEGER NOT NULL DEFAULT 0",
+    ).run();
+  if (!orderCols.includes("shipping_method"))
+    db.prepare("ALTER TABLE orders ADD COLUMN shipping_method TEXT").run();
+  if (!orderCols.includes("is_remote_area"))
+    db.prepare(
+      "ALTER TABLE orders ADD COLUMN is_remote_area INTEGER NOT NULL DEFAULT 0",
+    ).run();
+  if (!orderCols.includes("is_urgent"))
+    db.prepare(
+      "ALTER TABLE orders ADD COLUMN is_urgent INTEGER NOT NULL DEFAULT 0",
+    ).run();
 
   // Seed data
   seedAdminUser();

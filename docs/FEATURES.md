@@ -8,6 +8,7 @@
 | 商品瀏覽 | ✅ 完成 |
 | 購物車（雙模式）| ✅ 完成 |
 | 訂單管理 | ✅ 完成 |
+| 配送運費計算（Shipping 模組）| ✅ 完成 |
 | 模擬付款 | ✅ 完成（保留供測試用） |
 | 後台商品管理 | ✅ 完成 |
 | 後台訂單管理 | ✅ 完成 |
@@ -83,9 +84,12 @@
 2. 取得該用戶的購物車（user_id，非 session）
 3. 購物車為空回 400 CART_EMPTY
 4. 逐一檢查商品庫存，不足則列出商品名稱回 400
-5. 計算總金額
-6. 在 SQLite transaction 中：建立 order → 建立 order_items（快照價格/名稱）→ 扣庫存（`stock - quantity`）→ 清空購物車
+5. 計算商品小計 → 呼叫 Shipping 模組計算運費（配送參數不合法回 400 VALIDATION_ERROR）→ `total_amount = subtotal + shipping_fee`
+6. 在 SQLite transaction 中：建立 order（含運費欄位）→ 建立 order_items（快照價格/名稱）→ 扣庫存（`stock - quantity`）→ 清空購物車
 7. 訂單編號格式：`ORD-YYYYMMDD-XXXXX`（date + uuid前5碼大寫）
+8. 回應包含 `subtotal`、`shipping_fee`、`total_amount` 與 `shipping` 明細
+
+**運費試算** `POST /api/orders/shipping-quote`：以目前購物車小計與配送參數試算，不建立訂單、不扣庫存。結帳頁用此端點即時顯示運費。
 
 **付款模擬** `PATCH /api/orders/:id/pay`：
 - `action: "success"` → status 改為 `paid`
@@ -107,6 +111,61 @@ paid / failed → （不可再更新）
 | STOCK_INSUFFICIENT | 購物車商品庫存不足 |
 | INVALID_STATUS | 訂單狀態不是 pending |
 | NOT_FOUND | 訂單不存在或不屬於該用戶 |
+
+---
+
+## 配送運費計算（src/utils/shipping.js）
+
+運費邏輯集中於 Shipping 模組（純函式，不依賴 DB），由訂單路由呼叫。
+
+### 費用規則
+| 項目 | 金額 | 說明 |
+|------|------|------|
+| 宅配（`home_delivery`）基本運費 | 120 元 | 預設配送方式 |
+| 超商取貨（`convenience_store`） | 60 元 | **不是基本運費**，不適用滿額免運 |
+| 商品小計滿 1,500 元 | 免基本運費 | 僅宅配適用（`>= 1500`，1,499 元仍收 120 元） |
+| 偏遠地區（`isRemoteArea`） | +200 元 | 附加費，不因滿額免運而減免 |
+| 當日急件（`isUrgent`） | +250 元 | 附加費，不因滿額免運而減免 |
+
+運費 = 基本運費（或超商取貨費）+ 偏遠地區附加費 + 當日急件附加費；附加費可同時成立。
+
+### 計算範例
+| 情境 | 小計 | 運費 |
+|------|------|------|
+| 宅配 | 1,499 | 120 |
+| 宅配 | 1,500 | 0 |
+| 超商取貨 | 2,000 | 60 |
+| 宅配 + 偏遠 + 急件 | 1,000 | 570 |
+| 宅配滿額 + 偏遠 + 急件 | 1,500 | 450 |
+
+### 請求參數（`POST /api/orders`、`POST /api/orders/shipping-quote`）
+| 欄位 | 型別 | 預設 | 說明 |
+|------|------|------|------|
+| `shippingMethod` | string | `home_delivery` | `home_delivery` 或 `convenience_store` |
+| `isRemoteArea` | boolean | `false` | 偏遠地區 |
+| `isUrgent` | boolean | `false` | 當日急件 |
+
+未傳入配送參數時等同一般宅配，舊版前端/呼叫端不受影響。非布林值或未知配送方式回 400 VALIDATION_ERROR。
+
+### 回應中的 `shipping` 明細
+```json
+{
+  "method": "home_delivery",
+  "baseFee": 0,
+  "remoteAreaSurcharge": 200,
+  "urgentSurcharge": 250,
+  "shippingFee": 450,
+  "freeShippingApplied": true
+}
+```
+
+### 模組 API
+```js
+const { calculateShipping, ShippingError } = require('./src/utils/shipping');
+calculateShipping({ subtotal: 1500, method: 'home_delivery', isRemoteArea: true, isUrgent: false });
+// 參數不合法時拋出 ShippingError
+```
+費率常數（`HOME_DELIVERY_BASE_FEE`、`CONVENIENCE_STORE_FEE`、`FREE_SHIPPING_THRESHOLD`、`REMOTE_AREA_SURCHARGE`、`URGENT_SURCHARGE`）亦一併匯出。
 
 ---
 
@@ -181,7 +240,8 @@ paid / failed → （不可再更新）
 - 訂單必須屬於當前用戶且 `status === 'pending'`，否則回 400/403
 - `MerchantTradeNo` 格式：`EC` + Unix timestamp 後 10 碼 + UUID 前 8 碼大寫（共 20 字元）
 - `ItemName`：`商品名稱 x數量` 以 `#` 分隔，超過 400 字自動截斷（防止 CheckMacValue 失效）
-- `ChoosePayment` 固定為 `Credit`（信用卡）
+- `ChoosePayment` 預設 `ALL`（綠界頁面可選信用卡、網路 ATM 等），可用 `ECPAY_CHOOSE_PAYMENT` 限定（如 `Credit`）
+- 網路 ATM 為即時付款，付款後「返回商店」主動查詢即為 `TradeStatus=1`（E2E 以台灣土地銀行模擬頁驗證）
 - `ClientBackURL` 設為 `/orders/:id?payment=return`
 
 ### query 業務邏輯

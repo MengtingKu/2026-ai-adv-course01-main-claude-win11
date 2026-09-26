@@ -11,7 +11,7 @@
 | CSS 框架 | Tailwind CSS 4.2 |
 | 資料庫 | better-sqlite3（SQLite，WAL mode） |
 | 認證 | JWT（jsonwebtoken）+ bcrypt |
-| 測試 | Vitest 2.x + Supertest |
+| 測試 | Vitest 2.x + Supertest、Playwright（E2E） |
 | API 文件 | swagger-jsdoc |
 | 其他 | uuid, cors, dotenv |
 
@@ -42,8 +42,12 @@ npm run dev:server
 | `npm run dev:server` | 直接啟動伺服器 |
 | `npm run dev:css` | Tailwind CSS 監視模式 |
 | `npm run css:build` | 一次性建置並壓縮 CSS |
-| `npm test` | 執行完整測試套件 |
-| `npm run openapi` | 產生 OpenAPI JSON |
+| `npm test` | 執行全部 Vitest 測試（記憶體 SQLite，不動 database.sqlite） |
+| `npm run test:unit` | 單元測試（tests/unit） |
+| `npm run test:integration` | 結帳流程整合測試（tests/integration） |
+| `npm run test:e2e` | Playwright E2E（需先啟動伺服器於 3001） |
+| `npm run openapi` | 產生 `openapi.json` |
+| `npm run postman` | 產生 `openapi.json` 並轉為 `postman/flower-shop.postman_collection.json` |
 
 ## 預設帳號
 
