@@ -50,6 +50,11 @@ public/css/output.css
 .playwright-mcp/
 docs/e2e-screenshots/
 
-# Playwright 測試產物（tests/e2e/screenshots/ 保留入版控）
+# Playwright 測試產物（npm run test:e2e 產生）
 test-results/
 playwright-report/
+tests/e2e/screenshots/
+
+# OpenAPI / Postman 產出（npm run openapi / npm run postman 產生）
+openapi.json
+postman/
