@@ -1,125 +1,201 @@
-<div id="app">
-  <div class="flex items-center justify-between mb-6">
-    <h1 class="text-2xl font-bold text-text-primary">商品管理</h1>
+<div id="app" v-cloak>
+
+  <!-- Page head -->
+  <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-6 md:mb-8">
+    <div>
+      <p class="font-ui text-overline text-ink-500 mb-2">Catalogue</p>
+      <h1 class="font-display text-[34px] md:text-[44px] font-light leading-none">商品管理</h1>
+      <p class="font-ui text-[13px] text-ink-600 mt-3" v-if="!loading">
+        共 <span class="tabular-nums font-medium text-ink-900">{{ pagination.total }}</span> 件商品
+        <template v-if="lowStockCount > 0">
+          <span class="mx-2 text-line-soft" aria-hidden="true">·</span>
+          <span class="text-warning-ink">本頁 {{ lowStockCount }} 件庫存偏低</span>
+        </template>
+      </p>
+    </div>
     <button
+      type="button"
       @click="openCreate"
-      class="bg-rose-primary text-white px-4 py-2 rounded-lg text-sm hover:bg-rose-dark transition-colors"
+      class="m-fill w-full sm:w-auto h-11 px-6 inline-flex items-center justify-center gap-2 bg-ink-900 text-white font-ui text-[13px] font-medium tracking-[1px]"
     >
-      + 新增商品
+      <span aria-hidden="true" class="text-[16px] leading-none">+</span> 新增商品
     </button>
   </div>
 
-  <div v-if="loading" class="flex justify-center py-12">
-    <div class="w-8 h-8 border-4 border-rose-primary border-t-transparent rounded-full animate-spin"></div>
-  </div>
-
-  <template v-else>
-    <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-      <table class="w-full text-sm">
-        <thead>
-          <tr class="bg-gray-50 text-text-muted">
-            <th class="text-left px-4 py-3 font-normal">圖片</th>
-            <th class="text-left px-4 py-3 font-normal">商品名稱</th>
-            <th class="text-right px-4 py-3 font-normal">價格</th>
-            <th class="text-right px-4 py-3 font-normal">庫存</th>
-            <th class="text-right px-4 py-3 font-normal">操作</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="product in products" :key="product.id" class="border-t border-gray-50">
-            <td class="px-4 py-3">
-              <img
-                :src="product.image_url || 'https://images.unsplash.com/photo-1490750967868-88aa4f44baee?w=100'"
-                :alt="product.name"
-                class="w-12 h-12 rounded-lg object-cover"
-              />
-            </td>
-            <td class="px-4 py-3 text-text-primary">{{ product.name }}</td>
-            <td class="px-4 py-3 text-right text-text-secondary">NT$ {{ product.price.toLocaleString() }}</td>
-            <td class="px-4 py-3 text-right text-text-secondary">{{ product.stock }}</td>
-            <td class="px-4 py-3 text-right">
-              <button
-                @click="openEdit(product)"
-                class="text-rose-primary hover:text-rose-dark text-xs border border-rose-primary rounded px-2 py-1 mr-2"
-              >
-                編輯
-              </button>
-              <button
-                @click="confirmDeleteFn(product.id)"
-                class="text-red-500 hover:text-red-600 text-xs border border-red-300 rounded px-2 py-1"
-              >
-                刪除
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Pagination -->
-    <div v-if="pagination.totalPages > 1" class="flex justify-center gap-2 mt-6">
-      <button
-        v-for="p in pagination.totalPages"
-        :key="p"
-        @click="loadProducts(p)"
-        class="w-10 h-10 rounded-full text-sm transition-colors"
-        :class="p === pagination.page ? 'bg-rose-primary text-white' : 'bg-white text-text-secondary hover:bg-rose-bg'"
-      >
-        {{ p }}
-      </button>
-    </div>
-  </template>
-
-  <!-- Product Modal -->
-  <div v-if="modalVisible" class="fixed inset-0 z-50 flex items-center justify-center">
-    <div class="absolute inset-0 bg-black/40" @click="modalVisible = false"></div>
-    <div class="relative bg-white rounded-2xl shadow-xl w-full max-w-lg mx-4 p-6">
-      <h3 class="text-lg font-semibold text-text-primary mb-4">
-        {{ editingProduct ? '編輯商品' : '新增商品' }}
-      </h3>
-      <form @submit.prevent="handleSave" class="space-y-4">
-        <div>
-          <label class="block text-sm text-text-secondary mb-1">商品名稱 *</label>
-          <input v-model="form.name" type="text" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-rose-primary" />
-        </div>
-        <div>
-          <label class="block text-sm text-text-secondary mb-1">商品描述</label>
-          <textarea v-model="form.description" rows="3" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-rose-primary"></textarea>
-        </div>
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            <label class="block text-sm text-text-secondary mb-1">價格 *</label>
-            <input v-model.number="form.price" type="number" min="1" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-rose-primary" />
-          </div>
-          <div>
-            <label class="block text-sm text-text-secondary mb-1">庫存 *</label>
-            <input v-model.number="form.stock" type="number" min="0" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-rose-primary" />
-          </div>
-        </div>
-        <div>
-          <label class="block text-sm text-text-secondary mb-1">圖片 URL</label>
-          <input v-model="form.image_url" type="text" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-rose-primary" />
-        </div>
-        <div class="flex justify-end gap-3 pt-2">
-          <button type="button" @click="modalVisible = false" class="px-4 py-2 text-sm rounded-lg border border-gray-200 text-text-secondary hover:bg-gray-50">取消</button>
-          <button type="submit" :disabled="saving" class="px-4 py-2 text-sm rounded-lg bg-rose-primary text-white hover:bg-rose-dark disabled:opacity-50">
-            {{ saving ? '儲存中...' : '儲存' }}
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- Confirm Delete Dialog -->
-  <div v-if="confirmVisible" class="fixed inset-0 z-50 flex items-center justify-center">
-    <div class="absolute inset-0 bg-black/40" @click="confirmVisible = false"></div>
-    <div class="relative bg-white rounded-2xl shadow-xl w-full max-w-sm mx-4 p-6 text-center">
-      <h3 class="text-lg font-semibold text-text-primary mb-2">確認刪除</h3>
-      <p class="text-text-secondary text-sm mb-6">確定要刪除這個商品嗎？此操作無法復原。</p>
-      <div class="flex gap-3 justify-center">
-        <button @click="confirmVisible = false" class="px-4 py-2 text-sm rounded-lg border border-gray-200 text-text-secondary hover:bg-gray-50">取消</button>
-        <button @click="handleDelete" class="px-4 py-2 text-sm rounded-lg bg-red-500 text-white hover:bg-red-600">確認刪除</button>
+  <!-- Loading skeleton -->
+  <div v-if="loading" class="bg-bg-paper border border-line-soft divide-y divide-line-soft" aria-busy="true" aria-label="商品載入中">
+    <div v-for="n in 5" :key="n" class="flex items-center gap-4 p-4">
+      <div class="m-skeleton w-12 h-15 shrink-0"></div>
+      <div class="flex-1 space-y-2">
+        <div class="m-skeleton h-3.5 w-2/5"></div>
+        <div class="m-skeleton h-3 w-1/5"></div>
       </div>
     </div>
   </div>
+
+  <template v-else>
+    <!-- Empty -->
+    <div v-if="products.length === 0" class="bg-bg-paper border border-line-soft py-20 text-center">
+      <p class="font-display text-[32px] font-light text-ink-600 mb-2">尚無商品</p>
+      <p class="font-ui text-[13px] text-ink-500 mb-6">新增第一件商品，開始上架</p>
+      <button type="button" @click="openCreate" class="m-fill m-fill-ink h-10 px-6 border border-ink-900 font-ui text-[13px] hover:text-white">新增商品</button>
+    </div>
+
+    <template v-else>
+      <!-- Desktop table -->
+      <div class="hidden min-[1200px]:block bg-bg-paper border border-line-soft">
+        <table class="w-full font-ui text-[14px]">
+          <caption class="sr-only">商品列表</caption>
+          <thead>
+            <tr class="border-b border-line-soft text-ink-500">
+              <th scope="col" class="text-left font-medium text-[11px] tracking-[1.5px] uppercase px-5 h-11">商品</th>
+              <th scope="col" class="text-right font-medium text-[11px] tracking-[1.5px] uppercase px-5 h-11 w-36">價格</th>
+              <th scope="col" class="text-right font-medium text-[11px] tracking-[1.5px] uppercase px-5 h-11 w-36">庫存</th>
+              <th scope="col" class="text-right font-medium text-[11px] tracking-[1.5px] uppercase px-5 h-11 w-44"><span class="sr-only">操作</span></th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-line-soft">
+            <tr v-for="(product, i) in products" :key="product.id" class="m-row m-enter" :style="{ '--i': Math.min(i, 8) }">
+              <td class="px-5 py-3">
+                <div class="flex items-center gap-4 min-w-0">
+                  <img
+                    :src="product.image_url || fallbackImage"
+                    :alt="product.name"
+                    class="w-12 h-15 object-cover shrink-0 bg-bg-raised"
+                  />
+                  <div class="min-w-0">
+                    <p class="font-medium text-ink-900 truncate">{{ product.name }}</p>
+                    <p class="text-[12px] text-ink-500 tabular-nums">#{{ product.id.slice(0, 8) }}</p>
+                  </div>
+                </div>
+              </td>
+              <td class="px-5 py-3 text-right tabular-nums">NT$ {{ product.price.toLocaleString() }}</td>
+              <td class="px-5 py-3">
+                <!-- 標籤放數字左側、數字固定寬度靠右：有無標籤都不影響個位數對齊 -->
+                <div class="flex items-center justify-end gap-2">
+                  <span v-if="stockState(product.stock)" class="text-[11px] px-1.5 py-0.5 border" :class="stockState(product.stock).cls">{{ stockState(product.stock).label }}</span>
+                  <span class="w-12 shrink-0 text-right tabular-nums">{{ product.stock }}</span>
+                </div>
+              </td>
+              <td class="px-5 py-3">
+                <div class="flex justify-end gap-2">
+                  <button type="button" @click="openEdit(product)"
+                          class="m-fill m-fill-ink h-9 px-4 border border-ink-900 text-ink-900 text-[13px] hover:text-white"
+                          :aria-label="'編輯 ' + product.name">編輯</button>
+                  <button type="button" @click="confirmDeleteFn(product)"
+                          class="h-9 px-3 text-[13px] text-error-ink hover:bg-error/10 transition-colors"
+                          :aria-label="'刪除 ' + product.name">刪除</button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Mobile cards -->
+      <ul class="min-[1200px]:hidden grid gap-3 sm:grid-cols-2">
+        <li v-for="(product, i) in products" :key="product.id" class="m-enter flex flex-col bg-bg-paper border border-line-soft" :style="{ '--i': Math.min(i, 8) }">
+          <div class="flex gap-4 p-4">
+            <img :src="product.image_url || fallbackImage" :alt="product.name" class="w-16 h-20 object-cover shrink-0 bg-bg-raised" />
+            <div class="flex-1 min-w-0">
+              <p class="font-ui text-[15px] font-medium text-ink-900 leading-snug">{{ product.name }}</p>
+              <p class="font-ui text-[14px] text-ink-900 tabular-nums mt-1">NT$ {{ product.price.toLocaleString() }}</p>
+              <p class="font-ui text-[13px] text-ink-600 mt-1 flex items-center gap-2">
+                庫存 <span class="tabular-nums text-ink-900 min-w-[3ch]">{{ product.stock }}</span>
+                <span v-if="stockState(product.stock)" class="text-[11px] px-1.5 py-0.5 border" :class="stockState(product.stock).cls">{{ stockState(product.stock).label }}</span>
+              </p>
+            </div>
+          </div>
+          <div class="mt-auto grid grid-cols-2 border-t border-line-soft font-ui text-[14px]">
+            <button type="button" @click="openEdit(product)" class="h-12 text-ink-900 active:bg-bg-raised border-r border-line-soft">編輯</button>
+            <button type="button" @click="confirmDeleteFn(product)" class="h-12 text-error-ink active:bg-error/10">刪除</button>
+          </div>
+        </li>
+      </ul>
+
+      <!-- Pagination -->
+      <nav v-if="pagination.totalPages > 1" class="flex flex-wrap justify-center gap-2 mt-8" aria-label="分頁">
+        <button
+          v-for="p in pagination.totalPages"
+          :key="p"
+          type="button"
+          @click="loadProducts(p)"
+          :aria-current="p === pagination.page ? 'page' : null"
+          class="w-11 h-11 font-ui text-[13px] tabular-nums border transition-colors"
+          :class="p === pagination.page ? 'bg-ink-900 border-ink-900 text-white' : 'border-line-soft text-ink-600 hover:border-ink-900 hover:text-ink-900 bg-bg-paper'"
+        >{{ p }}</button>
+      </nav>
+    </template>
+  </template>
+
+  <!-- ══ Product drawer ══ -->
+  <transition name="m-drawer">
+    <div v-if="modalVisible" class="fixed inset-0 z-50" role="dialog" aria-modal="true" aria-labelledby="product-drawer-title">
+      <div class="absolute inset-0 bg-ink-900/50" @click="closeModal"></div>
+      <div class="m-drawer-panel absolute right-0 top-0 h-full w-full sm:max-w-md bg-bg-paper flex flex-col shadow-[0_8px_40px_rgba(26,25,23,.18)]">
+        <div class="flex items-center justify-between px-5 sm:px-7 h-16 border-b border-line-soft shrink-0">
+          <div>
+            <p class="font-ui text-overline text-ink-500">{{ editingProduct ? 'Edit' : 'New' }}</p>
+            <h2 id="product-drawer-title" class="font-display text-[24px] font-light leading-tight">{{ editingProduct ? '編輯商品' : '新增商品' }}</h2>
+          </div>
+          <button type="button" @click="closeModal" class="w-11 h-11 -mr-3 flex items-center justify-center text-ink-600 hover:text-ink-900" aria-label="關閉">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+
+        <form id="product-form" @submit.prevent="handleSave" class="flex-1 overflow-y-auto px-5 sm:px-7 py-6 space-y-5 font-ui">
+          <div v-if="form.image_url" class="aspect-[4/3] bg-bg-raised overflow-hidden">
+            <img :src="form.image_url" alt="圖片預覽" class="w-full h-full object-cover" />
+          </div>
+          <div>
+            <label for="pf-name" class="block text-[12px] font-medium text-ink-900 mb-2">商品名稱 <span class="text-error-ink">*</span></label>
+            <input id="pf-name" v-model="form.name" type="text" required class="w-full h-11 px-3 border border-line-soft bg-white text-[14px] focus:outline-none focus:border-ink-900 transition-colors" />
+          </div>
+          <div>
+            <label for="pf-desc" class="block text-[12px] font-medium text-ink-900 mb-2">商品描述</label>
+            <textarea id="pf-desc" v-model="form.description" rows="4" class="w-full px-3 py-2.5 border border-line-soft bg-white text-[14px] leading-relaxed focus:outline-none focus:border-ink-900 transition-colors"></textarea>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label for="pf-price" class="block text-[12px] font-medium text-ink-900 mb-2">價格（NT$）<span class="text-error-ink">*</span></label>
+              <input id="pf-price" v-model.number="form.price" type="number" min="1" step="1" inputmode="numeric" required class="w-full h-11 px-3 border border-line-soft bg-white text-[14px] tabular-nums focus:outline-none focus:border-ink-900 transition-colors" />
+            </div>
+            <div>
+              <label for="pf-stock" class="block text-[12px] font-medium text-ink-900 mb-2">庫存 <span class="text-error-ink">*</span></label>
+              <input id="pf-stock" v-model.number="form.stock" type="number" min="0" step="1" inputmode="numeric" required class="w-full h-11 px-3 border border-line-soft bg-white text-[14px] tabular-nums focus:outline-none focus:border-ink-900 transition-colors" />
+            </div>
+          </div>
+          <div>
+            <label for="pf-image" class="block text-[12px] font-medium text-ink-900 mb-2">圖片 URL</label>
+            <input id="pf-image" v-model="form.image_url" type="url" placeholder="https://" class="w-full h-11 px-3 border border-line-soft bg-white text-[14px] placeholder:text-ink-500 focus:outline-none focus:border-ink-900 transition-colors" />
+          </div>
+        </form>
+
+        <div class="grid grid-cols-2 gap-3 px-5 sm:px-7 py-4 border-t border-line-soft shrink-0 pb-[max(1rem,env(safe-area-inset-bottom))]">
+          <button type="button" @click="closeModal" class="h-12 border border-line-soft text-ink-600 font-ui text-[13px] hover:border-ink-900 hover:text-ink-900 transition-colors">取消</button>
+          <button type="submit" form="product-form" :disabled="saving" class="m-fill h-12 bg-ink-900 text-white font-ui text-[13px] font-medium tracking-[1px] disabled:opacity-50">
+            {{ saving ? '儲存中…' : '儲存' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </transition>
+
+  <!-- ══ Confirm delete ══ -->
+  <transition name="m-dialog">
+    <div v-if="confirmVisible" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:px-4" role="alertdialog" aria-modal="true" aria-labelledby="del-title" aria-describedby="del-desc">
+      <div class="absolute inset-0 bg-ink-900/50" @click="confirmVisible = false"></div>
+      <div class="m-dialog-panel relative bg-bg-paper w-full sm:max-w-sm p-6 sm:p-8 border-t sm:border border-line-soft pb-[max(1.5rem,env(safe-area-inset-bottom))]">
+        <h2 id="del-title" class="font-display text-[26px] font-light leading-tight mb-2">確認刪除</h2>
+        <div class="w-8 h-[2px] bg-error mb-4"></div>
+        <p id="del-desc" class="font-ui text-[14px] text-ink-600 mb-7 leading-relaxed">
+          確定要刪除「<span class="text-ink-900 font-medium">{{ deleteTarget?.name }}</span>」嗎？此操作無法復原。
+        </p>
+        <div class="grid grid-cols-2 gap-3">
+          <button type="button" @click="confirmVisible = false" class="h-12 border border-line-soft text-ink-600 font-ui text-[13px] hover:border-ink-900 hover:text-ink-900 transition-colors">取消</button>
+          <button type="button" @click="handleDelete" class="m-fill h-12 bg-error-ink text-white font-ui text-[13px] font-medium" style="--m-fill: var(--color-ink-900)">確認刪除</button>
+        </div>
+      </div>
+    </div>
+  </transition>
 </div>

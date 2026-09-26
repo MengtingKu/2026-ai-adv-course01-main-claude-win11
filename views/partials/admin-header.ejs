@@ -1,11 +1,26 @@
-<header class="sticky top-0 z-50 bg-gray-900 text-white shadow-sm">
-  <div class="flex items-center justify-between px-6 h-16">
-    <span class="font-bold text-lg" style="font-family: 'Noto Serif TC', serif;">花漾生活</span>
-    <div id="admin-auth-nav" class="flex items-center gap-4 text-sm">
-      <a href="/" class="text-gray-300 hover:text-white">返回前台</a>
-      <span class="text-gray-600">|</span>
-      <span class="text-gray-400" id="admin-username"></span>
-      <button onclick="Auth.logout()" class="text-gray-300 hover:text-white">登出</button>
+<!-- Mobile：深色品牌列 ／ Desktop：淺色工作列（麵包屑 + 使用者） -->
+<header class="sticky top-0 z-30 bg-bg-dark text-white md:bg-bg-base/90 md:text-ink-900 md:backdrop-blur border-b border-white/10 md:border-line-soft">
+  <div class="flex items-center justify-between h-14 md:h-[72px] px-4 sm:px-6 md:px-10">
+
+    <!-- Mobile brand -->
+    <a href="/admin/products" class="md:hidden flex items-center gap-2.5">
+      <span class="font-display text-[20px] font-semibold leading-none">花漾生活</span>
+      <span class="font-ui text-[9px] font-semibold tracking-[2px] uppercase border border-white/30 px-1.5 py-0.5 text-white/85">Admin</span>
+    </a>
+
+    <!-- Desktop breadcrumb -->
+    <p class="hidden md:block font-ui text-overline text-ink-500">
+      後台 <span class="mx-2 text-line-soft" aria-hidden="true">/</span>
+      <span class="text-ink-900"><%= typeof title !== 'undefined' ? title : '' %></span>
+    </p>
+
+    <div class="flex items-center gap-2 md:gap-5">
+      <span data-admin-name class="hidden md:inline font-ui text-[13px] text-ink-600"></span>
+      <a href="/" class="hidden md:inline-flex m-underline font-ui text-[13px] text-ink-600 hover:text-ink-900 transition-colors">返回前台</a>
+      <button type="button" onclick="Auth.logout()"
+              class="m-fill m-fill-ink font-ui text-[13px] h-9 px-4 border border-white/25 text-white md:border-ink-900 md:text-ink-900 hover:text-white hover:border-ink-900 transition-colors">
+        登出
+      </button>
     </div>
   </div>
 </header>

@@ -8,13 +8,19 @@
   --color-bg-dark:     #141210;
   --color-ink-900:     #1A1917;
   --color-ink-600:     #56524C;
+  --color-ink-500:     #6B665E;   /* 淺底上的次要文字：base 4.6:1 / paper 5.5:1（ink-400 在淺底僅 2.9:1，只當線條/裝飾） */
   --color-ink-400:     #8C877F;
   --color-line-strong: #1A1917;
   --color-line-soft:   #D6D2CA;
-  --color-cherry:      #D6435B;
-  --color-cherry-press:#B5324A;
+  /* cherry 加深以通過 WCAG AA：白字 5.75:1、壓 base 4.65 / paper 5.56（原 #D6435B 白字僅 4.36、壓 base 3.53） */
+  --color-cherry:      #B8354C;
+  --color-cherry-press:#962A3E;   /* hover / 按壓：白字 7.78:1 */
+  --color-cherry-light:#EE8294;   /* 深底 / 圖片暗角上的 cherry 文字：bg-dark 7.35:1 */
   --color-success:     #3F7A55;
   --color-warning:     #C07A2C;
+  --color-warning-ink: #8A5314;   /* warning 文字用：paper 6.1:1（#C07A2C 僅 3.4:1） */
+  --color-success-ink: #2F6343;   /* 狀態標籤文字（淡色底上仍 ≥4.5:1） */
+  --color-error-ink:   #A12C2C;
   --color-error:       #C23B3B;
 
   /* ── Font families ── */
@@ -45,3 +51,238 @@ body {
 
 /* ── Transition defaults ── */
 .transition-base { transition: all 160ms ease-out; }
+
+/* ══════════════════════════════════════════════════════════════
+   MOTION LAYER — Noir-inspired, restrained
+   只動 transform / opacity / clip-path；不影響版型。
+   .js-motion 由 head.ejs inline script 加上，無 JS 時內容照常顯示。
+   ══════════════════════════════════════════════════════════════ */
+:root {
+  --ease-noir:  cubic-bezier(0.22, 1, 0.36, 1);   /* 長尾緩出：大多數進場 */
+  --ease-snap:  cubic-bezier(0.65, 0, 0.35, 1);   /* 對稱：擦入 / 光澤 */
+  --dur-base:   420ms;
+  --dur-slow:   900ms;
+  --stagger:    70ms;
+}
+
+@keyframes m-rise      { from { opacity: 0; transform: translate3d(0, 24px, 0); } to { opacity: 1; transform: none; } }
+@keyframes m-fade      { from { opacity: 0; } to { opacity: 1; } }
+@keyframes m-fade-out  { to { opacity: 0; } }
+@keyframes m-line-up   { from { transform: translate3d(0, 108%, 0); } to { transform: none; } }
+@keyframes m-drop      { from { opacity: 0; transform: translate3d(0, -100%, 0); } to { opacity: 1; transform: none; } }
+@keyframes m-draw-x    { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes m-draw-y    { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+@keyframes m-curtain   { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+@keyframes m-kenburns  { from { transform: scale(1.14); } to { transform: scale(1); } }
+@keyframes m-breathe   { from { transform: scale(1); } to { transform: scale(1.045); } }
+@keyframes m-nudge     { 0%, 100% { transform: translateY(0); opacity: .5; } 50% { transform: translateY(5px); opacity: 1; } }
+@keyframes m-marquee   { to { transform: translate3d(-50%, 0, 0); } }
+@keyframes m-shimmer   { to { transform: translateX(100%); } }
+@keyframes m-bump      { 0% { transform: scale(1); } 35% { transform: scale(1.45); } 70% { transform: scale(.9); } 100% { transform: scale(1); } }
+@keyframes m-tick      { from { opacity: 0; transform: translateY(45%); } to { opacity: 1; transform: none; } }
+@keyframes m-toast-in  { from { opacity: 0; transform: translate3d(24px, 0, 0); } to { opacity: 1; transform: none; } }
+@keyframes m-toast-bar { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+
+/* ── 錨點定位：平滑捲動並避開 sticky header（手機 64px / 桌機 72px） ── */
+html { scroll-behavior: smooth; }
+section[id] { scroll-margin-top: 64px; }
+@media (min-width: 768px) { section[id] { scroll-margin-top: 72px; } }
+
+/* ── Perceived perf：Vue 掛載前隱藏未編譯模板（避免 {{ }} 閃爍）── */
+[v-cloak] { visibility: hidden; }
+
+/* ── Cross-document page transition（Chromium 126+，其他瀏覽器自動略過）── */
+@view-transition { navigation: auto; }
+::view-transition-old(root) { animation: 200ms ease-in both m-fade-out; }
+::view-transition-new(root) { animation: 420ms var(--ease-noir) both m-fade; }
+header.sticky { view-transition-name: site-header; }
+
+/* ── Header：首次造訪下滑進場 + 捲動狀態 ── */
+.m-first header.sticky > div { animation: m-drop 800ms var(--ease-noir) backwards; }
+header.sticky { transition: box-shadow var(--dur-base) var(--ease-noir), background-color var(--dur-base) var(--ease-noir); }
+header.sticky.is-scrolled { background-color: rgb(20 18 16 / 0.94); box-shadow: 0 8px 40px rgb(0 0 0 / 0.28); backdrop-filter: blur(10px); }
+
+/* ── 頁面內容進場（backwards fill：結束後不殘留 transform，避免影響 fixed/sticky 子元素）── */
+.js-motion main > #app:not(.m-home) { animation: m-fade 600ms var(--ease-noir) backwards; }
+
+/* ── 逐一進場容器：子元素依序上浮 ── */
+.js-motion .m-stagger > * { animation: m-rise 800ms var(--ease-noir) backwards; }
+.m-stagger > :nth-child(1)    { animation-delay: calc(var(--m-base, 0ms) + 0 * var(--stagger)); }
+.m-stagger > :nth-child(2)    { animation-delay: calc(var(--m-base, 0ms) + 1 * var(--stagger)); }
+.m-stagger > :nth-child(3)    { animation-delay: calc(var(--m-base, 0ms) + 2 * var(--stagger)); }
+.m-stagger > :nth-child(4)    { animation-delay: calc(var(--m-base, 0ms) + 3 * var(--stagger)); }
+.m-stagger > :nth-child(5)    { animation-delay: calc(var(--m-base, 0ms) + 4 * var(--stagger)); }
+.m-stagger > :nth-child(6)    { animation-delay: calc(var(--m-base, 0ms) + 5 * var(--stagger)); }
+.m-stagger > :nth-child(7)    { animation-delay: calc(var(--m-base, 0ms) + 6 * var(--stagger)); }
+.m-stagger > :nth-child(8)    { animation-delay: calc(var(--m-base, 0ms) + 7 * var(--stagger)); }
+.m-stagger > :nth-child(9)    { animation-delay: calc(var(--m-base, 0ms) + 8 * var(--stagger)); }
+.m-stagger > :nth-child(10)   { animation-delay: calc(var(--m-base, 0ms) + 9 * var(--stagger)); }
+.m-stagger > :nth-child(n+11) { animation-delay: calc(var(--m-base, 0ms) + 10 * var(--stagger)); }
+
+/* 單一元素進場（v-if 切換時會重播），--i 控制延遲 */
+.js-motion .m-enter { animation: m-rise 640ms var(--ease-noir) backwards; animation-delay: calc(var(--i, 0) * var(--stagger)); }
+
+/* ── Scroll reveal（motion.js 以 IntersectionObserver 加上 .is-in）── */
+.js-motion [data-reveal] {
+  opacity: 0;
+  transform: translate3d(0, 28px, 0);
+  transition: opacity var(--dur-slow) var(--ease-noir), transform 1100ms var(--ease-noir);
+  transition-delay: calc(var(--i, 0) * var(--stagger));
+}
+.js-motion [data-reveal="clip"] {
+  opacity: 1; transform: none;
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 1300ms var(--ease-snap);
+  transition-delay: calc(var(--i, 0) * var(--stagger));
+}
+.js-motion [data-reveal].is-in { opacity: 1; transform: none; }
+.js-motion [data-reveal="clip"].is-in { clip-path: inset(0 0 0 0); }
+
+/* ── 遮罩逐行上推（標題）── */
+.m-line { display: block; overflow: hidden; padding-bottom: 0.12em; margin-bottom: -0.12em; }
+.m-line > span { display: block; }
+.js-motion .m-line > span { animation: m-line-up 1100ms var(--ease-noir) backwards; animation-delay: var(--d, 0ms); }
+
+/* ── 延遲淡入 / 描線 / 布幕 ── */
+.js-motion .m-fade    { animation: m-fade 900ms var(--ease-noir) backwards; animation-delay: var(--d, 0ms); }
+.js-motion .m-rise    { animation: m-rise 900ms var(--ease-noir) backwards; animation-delay: var(--d, 0ms); }
+.m-seam               { transform-origin: left center; }
+.js-motion .m-seam    { animation: m-draw-x 900ms var(--ease-snap) backwards; animation-delay: var(--d, 0ms); }
+.m-seam-y             { transform-origin: top center; }
+.js-motion .m-seam-y  { animation: m-draw-y 1400ms var(--ease-snap) backwards; animation-delay: var(--d, 0ms); }
+.js-motion .m-curtain { animation: m-curtain 1400ms var(--ease-snap) backwards; animation-delay: var(--d, 0ms); }
+.m-nudge { display: inline-block; animation: m-nudge 2.2s ease-in-out infinite; }
+
+/* ── Hero 圖：Ken Burns 拉近後持續極慢呼吸 ── */
+.js-motion .m-kenburns {
+  animation: m-kenburns 2400ms var(--ease-noir) backwards, m-breathe 18s ease-in-out 2400ms infinite alternate;
+}
+
+/* ── 圖片：載入後淡入 + hover 放大改為長尾緩出 ── */
+main img { transition: opacity 700ms var(--ease-noir), transform 1100ms var(--ease-noir); }
+.js-motion main img:not(.is-loaded):not(.m-kenburns) { opacity: 0; }
+
+/* ── 卡片光澤掃過（Noir shine sweep 的克制版）── */
+.m-shine { position: relative; }
+.m-shine::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(105deg, transparent 35%, rgb(255 255 255 / 0.16) 50%, transparent 65%);
+  transform: translateX(-110%);
+}
+.group:hover .m-shine::after, .m-shine.group:hover::after { transform: translateX(110%); transition: transform 1100ms var(--ease-snap); }
+
+/* ── 按鈕填色擦入（Noir ripple → 方正擦入）── */
+.m-fill { position: relative; isolation: isolate; overflow: hidden; transition-property: color, border-color, opacity, transform; }
+.m-fill::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: var(--m-fill, var(--color-cherry-press));
+  transform: scaleX(0); transform-origin: right center;
+  transition: transform 520ms var(--ease-snap);
+}
+.m-fill:hover:not(:disabled)::before, .m-fill:focus-visible::before { transform: scaleX(1); transform-origin: left center; }
+.m-fill-ink { --m-fill: var(--color-ink-900); }
+.m-fill-ink::before { transform: scaleY(0); transform-origin: center bottom; }
+.m-fill-ink:hover:not(:disabled)::before, .m-fill-ink:focus-visible::before { transform: scaleY(1); transform-origin: center bottom; }
+.m-fill:active:not(:disabled) { transform: scale(0.985); }
+
+/* ── 連結底線生長 ── */
+.m-underline { position: relative; }
+.m-underline::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: -6px; height: 1px;
+  background: currentColor; transform: scaleX(0); transform-origin: right center;
+  transition: transform 420ms var(--ease-snap);
+}
+.m-underline:hover:not(:disabled)::after,
+.m-underline[aria-current="true"]::after { transform: scaleX(1); transform-origin: left center; }
+
+/* ── 箭頭位移 ── */
+.m-arrow { display: inline-block; transition: transform var(--dur-base) var(--ease-noir); }
+.group:hover .m-arrow, a:hover > .m-arrow, button:hover:not(:disabled) > .m-arrow { transform: translateX(5px); }
+
+/* ── 卡片說明文字 hover 上浮 ── */
+.m-caption { transition: transform 700ms var(--ease-noir); }
+.group:hover .m-caption { transform: translateY(-6px); }
+
+/* ── 跑馬燈 ── */
+.m-marquee-track { display: flex; width: max-content; animation: m-marquee 36s linear infinite; }
+.m-marquee:hover .m-marquee-track { animation-play-state: paused; }
+
+/* ── Skeleton shimmer（載入佔位）── */
+.m-skeleton { position: relative; overflow: hidden; background: var(--color-bg-raised); }
+.m-skeleton::after {
+  content: ""; position: absolute; inset: 0; transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.55), transparent);
+  animation: m-shimmer 1.4s ease-in-out infinite;
+}
+
+/* ── 微互動 ── */
+.m-bump { animation: m-bump 520ms var(--ease-noir); }
+.m-tick { animation: m-tick 320ms var(--ease-noir); }
+
+/* ── Toast ── */
+.m-toast { animation: m-toast-in 480ms var(--ease-noir); }
+.m-toast.is-leaving { opacity: 0; transform: translate3d(24px, 0, 0); transition: opacity 280ms ease-in, transform 280ms ease-in; }
+.m-toast-bar { transform-origin: left center; animation: m-toast-bar 3000ms linear forwards; }
+
+/* ── Mobile menu：兩線漢堡 → X ── */
+.m-burger { position: relative; display: block; width: 22px; height: 10px; }
+.m-burger > span {
+  position: absolute; left: 0; right: 0; height: 1.5px; background: currentColor;
+  transition: transform 420ms var(--ease-noir), width 420ms var(--ease-noir);
+}
+.m-burger > span:first-child { top: 0; }
+.m-burger > span:last-child  { bottom: 0; width: 68%; left: auto; }
+[aria-expanded="true"] .m-burger > span:first-child { transform: translateY(4.25px) rotate(45deg); }
+[aria-expanded="true"] .m-burger > span:last-child  { width: 100%; transform: translateY(-4.25px) rotate(-45deg); }
+
+/* ── Mobile menu sheet：由上往下布幕展開，項目依序上浮 ── */
+.m-sheet {
+  visibility: hidden;
+  clip-path: inset(0 0 100% 0);
+  transition: clip-path 560ms var(--ease-snap), visibility 0s linear 560ms;
+}
+.m-sheet.is-open { visibility: visible; clip-path: inset(0 0 0 0); transition: clip-path 640ms var(--ease-snap), visibility 0s; }
+.m-sheet-item { opacity: 0; transform: translate3d(0, 18px, 0); transition: opacity 300ms ease, transform 300ms ease; }
+.m-sheet.is-open .m-sheet-item {
+  opacity: 1; transform: none;
+  transition: opacity 600ms var(--ease-noir), transform 700ms var(--ease-noir);
+}
+.m-sheet.is-open nav > .m-sheet-item:nth-child(1) { transition-delay: 140ms; }
+.m-sheet.is-open nav > .m-sheet-item:nth-child(2) { transition-delay: 190ms; }
+.m-sheet.is-open nav > .m-sheet-item:nth-child(3) { transition-delay: 240ms; }
+.m-sheet.is-open nav > .m-sheet-item:nth-child(4) { transition-delay: 290ms; }
+.m-sheet.is-open > div > .m-sheet-item:nth-last-child(2) { transition-delay: 360ms; }
+.m-sheet.is-open > div > .m-sheet-item:last-child { transition-delay: 420ms; }
+html.m-menu-open { overflow: hidden; }
+
+/* ── Admin：右側抽屜 / 置中對話框（Vue <transition>） ── */
+.m-drawer-enter-active, .m-drawer-leave-active { transition: opacity 480ms var(--ease-noir); }
+.m-drawer-enter-from, .m-drawer-leave-to { opacity: 0; }
+.m-drawer-panel { transition: transform 480ms var(--ease-noir); }
+.m-drawer-enter-from .m-drawer-panel, .m-drawer-leave-to .m-drawer-panel { transform: translate3d(100%, 0, 0); }
+.m-dialog-enter-active, .m-dialog-leave-active { transition: opacity 320ms var(--ease-noir); }
+.m-dialog-enter-from, .m-dialog-leave-to { opacity: 0; }
+.m-dialog-panel { transition: transform 320ms var(--ease-noir); }
+.m-dialog-enter-from .m-dialog-panel, .m-dialog-leave-to .m-dialog-panel { transform: translate3d(0, 12px, 0) scale(0.98); }
+
+/* 可點擊表格列 */
+.m-row { transition: background-color 200ms ease; }
+.m-row:hover, .m-row:focus-visible { background-color: var(--color-bg-raised); }
+.m-row:focus-visible { outline-offset: -2px; }
+
+/* ── 鍵盤焦點：統一可見焦點環（深 / 淺底皆 ≥3:1） ── */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-cherry); outline-offset: 2px;
+}
+
+/* ── 無障礙：減少動態 ── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 1ms !important; animation-delay: 0ms !important; animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important; transition-delay: 0ms !important;
+  }
+  .js-motion [data-reveal] { opacity: 1; transform: none; clip-path: none; }
+  html { scroll-behavior: auto; }
+  .m-marquee-track, .m-nudge { animation: none; }
+  ::view-transition-old(root), ::view-transition-new(root) { animation: none; }
+}

@@ -6,8 +6,14 @@
 .
 ├── app.js                  # Express app 設定（middleware、路由掛載）
 ├── server.js               # HTTP server 啟動（含 JWT_SECRET 檢查）
-├── database.sqlite         # SQLite 資料庫（WAL mode）
-├── vitest.config.js        # 測試配置（測試順序）
+├── database.sqlite         # SQLite 資料庫（WAL mode；可用 DB_PATH 改路徑）
+├── vitest.config.js        # Vitest 配置（DB_PATH=:memory:、排除 e2e）
+├── playwright.config.js    # Playwright E2E 配置（連線已啟動的 3001，無 webServer）
+├── openapi.json            # npm run openapi 產出
+├── postman/
+│   └── flower-shop.postman_collection.json # npm run postman 產出
+├── scripts/
+│   └── generate-postman.js # openapi.json → Postman Collection
 ├── generate-openapi.js     # OpenAPI JSON 產生器
 ├── swagger-config.js       # Swagger UI 配置
 ├── public/
@@ -36,9 +42,17 @@
 │   │   ├── sessionMiddleware.js # X-Session-Id 標頭解析
 │   │   └── errorHandler.js     # 全域錯誤處理（Express error middleware）
 │   └── utils/
-│       └── ecpay.js            # CheckMacValue 計算、表單參數組裝、QueryTradeInfo 查詢
+│       ├── ecpay.js            # CheckMacValue 計算、表單參數組裝、QueryTradeInfo 查詢
+│       └── shipping.js         # 運費計算（配送方式、滿額免運、偏遠/急件附加費），純函式
 └── tests/
     ├── setup.js            # 共用輔助函式（getAdminToken, registerUser）
+    ├── unit/
+    │   └── shipping.test.js    # Shipping 模組單元測試（不需 DB）
+    ├── integration/
+    │   └── checkout.test.js    # 結帳流程整合測試（記憶體 SQLite）
+    ├── e2e/
+    │   ├── checkout-webatm.spec.js # Playwright：結帳 + 綠界網路 ATM 付款
+    │   └── screenshots/        # E2E 截圖
     ├── auth.test.js
     ├── products.test.js
     ├── cart.test.js
@@ -78,7 +92,8 @@ server.js
 | POST | /api/cart | JWT 或 Session | 加入購物車 |
 | PATCH | /api/cart/:itemId | JWT 或 Session | 修改數量 |
 | DELETE | /api/cart/:itemId | JWT 或 Session | 移除項目 |
-| POST | /api/orders | JWT | 從購物車建立訂單（含扣庫存 transaction） |
+| POST | /api/orders/shipping-quote | JWT | 依購物車試算運費與訂單總額（不建立訂單） |
+| POST | /api/orders | JWT | 從購物車建立訂單（含運費計算、扣庫存 transaction） |
 | GET | /api/orders | JWT | 個人訂單列表 |
 | GET | /api/orders/:id | JWT | 訂單詳情 |
 | PATCH | /api/orders/:id/pay | JWT | 模擬付款（action: success/fail，保留供測試） |
@@ -177,7 +192,12 @@ server.js
 | recipient_name | TEXT | NOT NULL |
 | recipient_email | TEXT | NOT NULL |
 | recipient_address | TEXT | NOT NULL |
-| total_amount | INTEGER | NOT NULL |
+| subtotal | INTEGER | 商品小計；可為 NULL（運費功能上線前的舊訂單） |
+| shipping_fee | INTEGER | NOT NULL DEFAULT 0，運費總計（基本運費 + 附加費） |
+| shipping_method | TEXT | `home_delivery` / `convenience_store`；舊訂單為 NULL |
+| is_remote_area | INTEGER | NOT NULL DEFAULT 0，偏遠地區（0/1） |
+| is_urgent | INTEGER | NOT NULL DEFAULT 0，當日急件（0/1） |
+| total_amount | INTEGER | NOT NULL，= subtotal + shipping_fee（綠界付款金額） |
 | status | TEXT | NOT NULL DEFAULT 'pending', CHECK IN ('pending','paid','failed') |
 | merchant_trade_no | TEXT | 可為 NULL，綠界付款時寫入，格式：`EC` + 10位timestamp + 8碼UUID |
 | paid_at | TEXT | 可為 NULL，付款成功時由綠界 QueryTradeInfo 回傳的付款時間 |

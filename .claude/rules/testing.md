@@ -24,7 +24,13 @@ const { app, request, getAdminToken, registerUser } = require('./setup');
 `registerUser()` 每次產生唯一 email（含 timestamp + random），不會重複。需要特定 email 時使用 `registerUser({ email: '...' })`。
 
 ## 資料庫狀態
-所有測試共用 `database.sqlite`，不重置。測試之間有狀態依賴，須考慮執行順序影響。
+Vitest 以 `DB_PATH=':memory:'` 執行（vitest.config.js 的 `test.env`），每個測試檔各自一個全新的記憶體 SQLite（含 seed），
+不會讀寫 `database.sqlite`。測試檔之間不共享資料；同檔內測試共用，需自行建立並清除測試資料。
+
+## 目錄
+- `tests/unit/`：純函式單元測試（`npm run test:unit`）
+- `tests/integration/`：整合測試（`npm run test:integration`），子目錄使用 `require('../setup')`
+- `tests/e2e/`：Playwright（`npm run test:e2e`），連線已啟動的 3001，Vitest 已排除此目錄
 
 ## 不要修改的設定
 - 不要修改 `vitest.config.js` 的 sequence.files 順序

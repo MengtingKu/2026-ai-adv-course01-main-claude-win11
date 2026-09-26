@@ -112,3 +112,100 @@ describe('Orders API', () => {
     expect(res.body).toHaveProperty('error');
   });
 });
+
+describe('Orders API - shipping fee', () => {
+  let userToken;
+  let product;
+
+  const recipient = {
+    recipientName: '測試收件人',
+    recipientEmail: 'recipient@example.com',
+    recipientAddress: '台北市測試路 123 號',
+  };
+
+  async function addToCart(quantity) {
+    await request(app)
+      .post('/api/cart')
+      .set('Authorization', `Bearer ${userToken}`)
+      .send({ productId: product.id, quantity });
+  }
+
+  beforeAll(async () => {
+    const { token } = await registerUser();
+    userToken = token;
+
+    // 取一個單價低於 1,500 且庫存足夠的商品，方便構造未達門檻 / 達門檻情境
+    const prodRes = await request(app).get('/api/products?limit=100');
+    product = prodRes.body.data.products.find((p) => p.price < 1500 && p.stock >= 10);
+  });
+
+  it('should quote shipping for current cart without creating order', async () => {
+    await addToCart(1);
+
+    const res = await request(app)
+      .post('/api/orders/shipping-quote')
+      .set('Authorization', `Bearer ${userToken}`)
+      .send({ shippingMethod: 'convenience_store', isUrgent: true });
+
+    expect(res.status).toBe(200);
+    expect(res.body.error).toBeNull();
+    expect(res.body.data.subtotal).toBe(product.price);
+    expect(res.body.data.shipping_fee).toBe(60 + 250);
+    expect(res.body.data.total_amount).toBe(product.price + 310);
+  });
+
+  it('should default to home delivery and include shipping fee in total_amount', async () => {
+    const res = await request(app)
+      .post('/api/orders')
+      .set('Authorization', `Bearer ${userToken}`)
+      .send(recipient);
+
+    expect(res.status).toBe(201);
+    expect(res.body.data.subtotal).toBe(product.price);
+    expect(res.body.data.shipping_fee).toBe(120);
+    expect(res.body.data.total_amount).toBe(product.price + 120);
+    expect(res.body.data.shipping.method).toBe('home_delivery');
+
+    const detail = await request(app)
+      .get(`/api/orders/${res.body.data.id}`)
+      .set('Authorization', `Bearer ${userToken}`);
+    expect(detail.body.data.shipping_method).toBe('home_delivery');
+    expect(detail.body.data.shipping_fee).toBe(120);
+    expect(detail.body.data.total_amount).toBe(product.price + 120);
+  });
+
+  it('should waive base fee over threshold but still charge surcharges', async () => {
+    const quantity = Math.ceil(1500 / product.price);
+    await addToCart(quantity);
+    const subtotal = product.price * quantity;
+
+    const res = await request(app)
+      .post('/api/orders')
+      .set('Authorization', `Bearer ${userToken}`)
+      .send({ ...recipient, shippingMethod: 'home_delivery', isRemoteArea: true, isUrgent: true });
+
+    expect(res.status).toBe(201);
+    expect(res.body.data.shipping.freeShippingApplied).toBe(true);
+    expect(res.body.data.shipping_fee).toBe(450);
+    expect(res.body.data.total_amount).toBe(subtotal + 450);
+  });
+
+  it('should reject invalid shipping method without creating order', async () => {
+    await addToCart(1);
+
+    const res = await request(app)
+      .post('/api/orders')
+      .set('Authorization', `Bearer ${userToken}`)
+      .send({ ...recipient, shippingMethod: 'drone' });
+
+    expect(res.status).toBe(400);
+    expect(res.body).toHaveProperty('data', null);
+    expect(res.body).toHaveProperty('error', 'VALIDATION_ERROR');
+
+    // 購物車應保留（訂單未建立）
+    const cartRes = await request(app)
+      .get('/api/cart')
+      .set('Authorization', `Bearer ${userToken}`);
+    expect(cartRes.body.data.items.length).toBe(1);
+  });
+});

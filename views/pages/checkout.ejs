@@ -1,8 +1,8 @@
-<div id="app" class="max-w-screen-xl mx-auto px-4 md:px-12 py-8 md:py-16">
+<div id="app" v-cloak class="max-w-screen-xl mx-auto px-4 md:px-12 py-8 md:py-16">
 
   <!-- Page header -->
   <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-1 mb-6 md:mb-10">
-    <p class="font-ui text-overline text-ink-400">結帳</p>
+    <p class="font-ui text-overline text-ink-500">結帳</p>
     <h1 class="font-display text-[28px] md:text-[52px] font-light text-ink-900 leading-none">Checkout</h1>
   </div>
 
@@ -16,7 +16,7 @@
     <!-- Left: Recipient form -->
     <div class="flex-1 min-w-0">
       <div class="border border-line-soft bg-bg-paper p-5 md:p-8">
-        <h2 class="font-ui text-overline text-ink-400 mb-6">收件資訊</h2>
+        <h2 class="font-ui text-overline text-ink-500 mb-6">收件資訊</h2>
 
         <div class="space-y-6">
           <!-- Name -->
@@ -26,10 +26,10 @@
               v-model="form.recipientName"
               type="text"
               placeholder="請輸入收件人姓名"
-              class="w-full border border-line-soft bg-white px-4 h-11 font-ui text-[14px] text-ink-900 placeholder:text-ink-400 focus:outline-none focus:border-ink-900 transition-colors"
+              class="w-full border border-line-soft bg-white px-4 h-11 font-ui text-[14px] text-ink-900 placeholder:text-ink-500 focus:outline-none focus:border-ink-900 transition-colors"
               :class="{ 'border-error': errors.recipientName }"
             />
-            <p v-if="errors.recipientName" class="font-ui text-[12px] text-error mt-1.5">{{ errors.recipientName }}</p>
+            <p v-if="errors.recipientName" class="font-ui text-[12px] text-error-ink mt-1.5">{{ errors.recipientName }}</p>
           </div>
 
           <!-- Email -->
@@ -39,10 +39,10 @@
               v-model="form.recipientEmail"
               type="email"
               placeholder="請輸入 Email"
-              class="w-full border border-line-soft bg-white px-4 h-11 font-ui text-[14px] text-ink-900 placeholder:text-ink-400 focus:outline-none focus:border-ink-900 transition-colors"
+              class="w-full border border-line-soft bg-white px-4 h-11 font-ui text-[14px] text-ink-900 placeholder:text-ink-500 focus:outline-none focus:border-ink-900 transition-colors"
               :class="{ 'border-error': errors.recipientEmail }"
             />
-            <p v-if="errors.recipientEmail" class="font-ui text-[12px] text-error mt-1.5">{{ errors.recipientEmail }}</p>
+            <p v-if="errors.recipientEmail" class="font-ui text-[12px] text-error-ink mt-1.5">{{ errors.recipientEmail }}</p>
           </div>
 
           <!-- Address -->
@@ -52,11 +52,51 @@
               v-model="form.recipientAddress"
               type="text"
               placeholder="請輸入收件地址"
-              class="w-full border border-line-soft bg-white px-4 h-11 font-ui text-[14px] text-ink-900 placeholder:text-ink-400 focus:outline-none focus:border-ink-900 transition-colors"
+              class="w-full border border-line-soft bg-white px-4 h-11 font-ui text-[14px] text-ink-900 placeholder:text-ink-500 focus:outline-none focus:border-ink-900 transition-colors"
               :class="{ 'border-error': errors.recipientAddress }"
             />
-            <p v-if="errors.recipientAddress" class="font-ui text-[12px] text-error mt-1.5">{{ errors.recipientAddress }}</p>
+            <p v-if="errors.recipientAddress" class="font-ui text-[12px] text-error-ink mt-1.5">{{ errors.recipientAddress }}</p>
           </div>
+        </div>
+      </div>
+
+      <div class="border border-line-soft bg-bg-paper p-5 md:p-8 mt-6">
+        <h2 class="font-ui text-overline text-ink-500 mb-6">配送方式</h2>
+
+        <div class="space-y-3 mb-6">
+          <label class="flex items-center justify-between gap-4 border border-line-soft bg-white px-4 h-12 cursor-pointer"
+                 :class="{ 'border-ink-900': form.shippingMethod === 'home_delivery' }">
+            <span class="flex items-center gap-3">
+              <input type="radio" value="home_delivery" v-model="form.shippingMethod" class="accent-cherry" />
+              <span class="font-ui text-[14px] text-ink-900">宅配到府</span>
+            </span>
+            <span class="font-ui text-[12px] text-ink-600">NT$ <%= shippingRules.homeDeliveryFee %>・滿 NT$ <%= shippingRules.freeShippingThreshold.toLocaleString() %> 免運</span>
+          </label>
+          <label class="flex items-center justify-between gap-4 border border-line-soft bg-white px-4 h-12 cursor-pointer"
+                 :class="{ 'border-ink-900': form.shippingMethod === 'convenience_store' }">
+            <span class="flex items-center gap-3">
+              <input type="radio" value="convenience_store" v-model="form.shippingMethod" class="accent-cherry" />
+              <span class="font-ui text-[14px] text-ink-900">超商取貨</span>
+            </span>
+            <span class="font-ui text-[12px] text-ink-600">NT$ <%= shippingRules.convenienceStoreFee %></span>
+          </label>
+        </div>
+
+        <div class="space-y-3">
+          <label class="flex items-center justify-between gap-4 cursor-pointer">
+            <span class="flex items-center gap-3">
+              <input type="checkbox" v-model="form.isRemoteArea" class="accent-cherry" />
+              <span class="font-ui text-[14px] text-ink-900">偏遠地區</span>
+            </span>
+            <span class="font-ui text-[12px] text-ink-600">+ NT$ <%= shippingRules.remoteAreaSurcharge %></span>
+          </label>
+          <label class="flex items-center justify-between gap-4 cursor-pointer">
+            <span class="flex items-center gap-3">
+              <input type="checkbox" v-model="form.isUrgent" class="accent-cherry" />
+              <span class="font-ui text-[14px] text-ink-900">當日急件</span>
+            </span>
+            <span class="font-ui text-[12px] text-ink-600">+ NT$ <%= shippingRules.urgentSurcharge %></span>
+          </label>
         </div>
       </div>
     </div>
@@ -64,7 +104,7 @@
     <!-- Right: Summary -->
     <div class="lg:w-80 shrink-0">
       <div class="border border-line-soft bg-bg-paper p-5 md:p-6 sticky top-24">
-        <h2 class="font-ui text-overline text-ink-400 mb-5">訂單摘要</h2>
+        <h2 class="font-ui text-overline text-ink-500 mb-5">訂單摘要</h2>
 
         <!-- Items -->
         <div class="space-y-3 mb-5">
@@ -81,23 +121,33 @@
             <span class="font-ui text-[13px] text-ink-600">商品小計</span>
             <span class="font-ui text-[13px] text-ink-900">NT$ {{ cartTotal.toLocaleString() }}</span>
           </div>
-          <div class="flex justify-between">
-            <span class="font-ui text-[13px] text-ink-600">運費</span>
-            <span class="font-ui text-[13px] text-ink-900">{{ cartTotal >= 500 ? '免運' : 'NT$ 150' }}</span>
-          </div>
+          <template v-if="quote">
+            <div class="flex justify-between">
+              <span class="font-ui text-[13px] text-ink-600">{{ quote.shipping.method === 'home_delivery' ? '宅配運費' : '超商取貨' }}</span>
+              <span class="font-ui text-[13px] text-ink-900">{{ quote.shipping.freeShippingApplied ? '免運' : 'NT$ ' + quote.shipping.baseFee.toLocaleString() }}</span>
+            </div>
+            <div v-if="quote.shipping.remoteAreaSurcharge" class="flex justify-between">
+              <span class="font-ui text-[13px] text-ink-600">偏遠地區附加費</span>
+              <span class="font-ui text-[13px] text-ink-900">NT$ {{ quote.shipping.remoteAreaSurcharge.toLocaleString() }}</span>
+            </div>
+            <div v-if="quote.shipping.urgentSurcharge" class="flex justify-between">
+              <span class="font-ui text-[13px] text-ink-600">當日急件附加費</span>
+              <span class="font-ui text-[13px] text-ink-900">NT$ {{ quote.shipping.urgentSurcharge.toLocaleString() }}</span>
+            </div>
+          </template>
         </div>
 
         <div class="border-t border-line-soft pt-4 flex justify-between items-center mb-6">
           <span class="font-ui text-[14px] font-medium text-ink-900">總計</span>
           <span class="font-display text-[24px] font-medium text-cherry">
-            NT$ {{ (cartTotal + (cartTotal >= 500 ? 0 : 150)).toLocaleString() }}
+            NT$ {{ (quote ? quote.total_amount : cartTotal).toLocaleString() }}
           </span>
         </div>
 
         <button
           @click="submitOrder"
           :disabled="submitting"
-          class="w-full h-12 font-ui text-[13px] font-medium tracking-[1px] bg-cherry text-white hover:bg-cherry-press transition-colors duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
+          class="m-fill w-full h-12 font-ui text-[13px] font-medium tracking-[1px] bg-cherry text-white transition-colors duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
         >
           {{ submitting ? '處理中...' : '確認送出訂單' }}
         </button>

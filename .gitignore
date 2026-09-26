@@ -49,3 +49,12 @@ public/css/output.css
 # Playwright / E2E 測試一次性產物（snapshot、console log、測試截圖），不入版控
 .playwright-mcp/
 docs/e2e-screenshots/
+
+# Playwright 測試產物（npm run test:e2e 產生）
+test-results/
+playwright-report/
+tests/e2e/screenshots/
+
+# OpenAPI / Postman 產出（npm run openapi / npm run postman 產生）
+openapi.json
+postman/

@@ -69,7 +69,8 @@ function buildPaymentParams(order, items, baseUrl) {
     ItemName: buildItemName(items),
     ReturnURL: `${baseUrl}/api/payments/ecpay/notify`,
     ClientBackURL: `${baseUrl}/orders/${order.id}?payment=return`,
-    ChoosePayment: 'Credit',
+    // ALL：綠界頁面可選信用卡、網路 ATM 等；可用 ECPAY_CHOOSE_PAYMENT 限定（如 Credit）
+    ChoosePayment: process.env.ECPAY_CHOOSE_PAYMENT || 'ALL',
     EncryptType: 1,
   };
 

@@ -16,21 +16,28 @@
 | `bg/paper` | `#FCFBF9` | 表單 / 浮層最高層 |
 | `ink/900` | `#1A1917` | 主文字 / 標題（炭黑） |
 | `ink/600` | `#56524C` | 次文字 |
-| `ink/400` | `#8C877F` | 輔助 / 佔位 |
+| `ink/500` | `#6B665E` | 淺底上的輔助文字（base 4.6:1 / paper 5.5:1） |
+| `ink/400` | `#8C877F` | 線條 / 裝飾 / 深底上的輔助文字（淺底僅 2.9:1，不可當文字） |
 | `line/strong` | `#1A1917` | 重點細線（1px 黑線，極簡語言核心） |
 | `line/soft` | `#D6D2CA` | 一般分隔線 |
 
 ### 1.2 重點色（單一品牌色 + 機能色）
 | Token | Hex | 用途 |
 |-------|-----|------|
-| `accent/cherry` | `#D6435B` | 唯一品牌重點色：CTA、價格、強調、選中態 |
-| `accent/cherry-press` | `#B5324A` | 按壓 / hover |
+| `accent/cherry` | `#B8354C` | 唯一品牌重點色：CTA、價格、強調、選中態（白字 5.75:1、壓 base 4.65:1） |
+| `accent/cherry-press` | `#962A3E` | 按壓 / hover |
+| `accent/cherry-light` | `#EE8294` | 深底 / 圖片暗角上的 cherry 文字（bg-dark 7.35:1） |
 | `state/success` | `#3F7A55` | 已付款 / 成功 |
 | `state/warning` | `#C07A2C` | 待付款 |
 | `state/error` | `#C23B3B` | 失敗 / 錯誤 |
+| `state/*-ink` | success `#2F6343` · warning `#8A5314` · error `#A12C2C` | 狀態標籤**文字**（10% 淡底上 ≥5.5:1） |
 
 > 規則：**全站只有一個鮮色（cherry）**。所有「動作」與「金額」用它，其餘一律中性。
 > 機能色僅出現在狀態標籤，面積極小。
+
+> **對比（WCAG AA，全站文字 ≥4.5:1）**：cherry 由原 `#D6435B`（白字 4.36、壓 base 3.53，不達標）加深為 `#B8354C`。
+> 深底 / 圖片上的 cherry 小字用 `cherry-light`；淺底輔助文字用 `ink/500`，`ink/400` 只用於深底文字或線條。
+> 機能色文字一律用 `*-ink`，`state/warning` 本色（3.35:1）只用於圓點 / 邊框。
 
 ---
 

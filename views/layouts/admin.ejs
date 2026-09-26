@@ -1,15 +1,19 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <%- include('../partials/head') %>
-<body class="min-h-screen flex flex-col">
-  <%- include('../partials/admin-header') %>
-  <div class="flex flex-1">
+<body class="min-h-screen bg-bg-base text-ink-900">
+  <div class="md:flex min-h-screen">
     <%- include('../partials/admin-sidebar') %>
-    <main class="flex-1 p-8 bg-cream">
-      <%- body %>
-    </main>
+
+    <div class="flex-1 min-w-0 flex flex-col">
+      <%- include('../partials/admin-header') %>
+      <!-- 手機底部分頁列高 64px + safe area，main 預留空間 -->
+      <main class="flex-1 w-full max-w-6xl mx-auto px-4 sm:px-6 md:px-10 pt-6 md:pt-10 pb-[calc(88px+env(safe-area-inset-bottom))] md:pb-12">
+        <%- body %>
+      </main>
+    </div>
   </div>
-  <%- include('../partials/footer') %>
+
   <%- include('../partials/notification') %>
 
   <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
@@ -19,8 +23,9 @@
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       if (!Auth.requireAdmin()) return;
-      var el = document.getElementById('admin-username');
-      if (el) el.textContent = Auth.getUser()?.name || '';
+      var name = Auth.getUser()?.name || '';
+      document.querySelectorAll('[data-admin-name]').forEach(function (el) { el.textContent = name; });
+      document.querySelectorAll('[data-admin-initial]').forEach(function (el) { el.textContent = name.trim().charAt(0) || 'A'; });
     });
   </script>
   <% if (typeof pageScript !== 'undefined' && pageScript) { %>

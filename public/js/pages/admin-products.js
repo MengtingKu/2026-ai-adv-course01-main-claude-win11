@@ -1,4 +1,4 @@
-const { createApp, ref, onMounted } = Vue;
+const { createApp, ref, computed, onMounted, onBeforeUnmount } = Vue;
 
 createApp({
   setup() {
@@ -12,7 +12,21 @@ createApp({
     const form = ref({ name: '', description: '', price: 0, stock: 0, image_url: '' });
 
     const confirmVisible = ref(false);
-    const deleteId = ref('');
+    const deleteTarget = ref(null);
+
+    const fallbackImage = 'https://images.unsplash.com/photo-1490750967868-88aa4f44baee?w=160';
+    const LOW_STOCK = 5;
+
+    // 庫存狀態標籤（文字色皆使用 *-ink token，淡底上 ≥4.5:1）
+    function stockState(stock) {
+      if (stock <= 0) return { label: '售完', cls: 'text-error-ink bg-error/10 border-error/25' };
+      if (stock <= LOW_STOCK) return { label: '偏低', cls: 'text-warning-ink bg-warning/10 border-warning/30' };
+      return null;
+    }
+
+    const lowStockCount = computed(function () {
+      return products.value.filter(function (p) { return p.stock <= LOW_STOCK; }).length;
+    });
 
     async function loadProducts(page) {
       page = page || 1;
@@ -46,6 +60,10 @@ createApp({
       modalVisible.value = true;
     }
 
+    function closeModal() {
+      modalVisible.value = false;
+    }
+
     async function handleSave() {
       if (!form.value.name.trim() || form.value.price <= 0) {
         Notification.show('請填寫必要欄位', 'warning');
@@ -75,15 +93,15 @@ createApp({
       }
     }
 
-    function confirmDeleteFn(id) {
-      deleteId.value = id;
+    function confirmDeleteFn(product) {
+      deleteTarget.value = product;
       confirmVisible.value = true;
     }
 
     async function handleDelete() {
       confirmVisible.value = false;
       try {
-        await apiFetch('/api/admin/products/' + deleteId.value, { method: 'DELETE' });
+        await apiFetch('/api/admin/products/' + deleteTarget.value.id, { method: 'DELETE' });
         Notification.show('商品已刪除', 'success');
         await loadProducts(pagination.value.page);
       } catch (e) {
@@ -91,15 +109,25 @@ createApp({
       }
     }
 
+    function onKeydown(e) {
+      if (e.key !== 'Escape') return;
+      if (confirmVisible.value) confirmVisible.value = false;
+      else if (modalVisible.value) closeModal();
+    }
+
     onMounted(function () {
       loadProducts();
+      document.addEventListener('keydown', onKeydown);
+    });
+    onBeforeUnmount(function () {
+      document.removeEventListener('keydown', onKeydown);
     });
 
     return {
-      products, pagination, loading,
+      products, pagination, loading, fallbackImage, lowStockCount, stockState,
       modalVisible, editingProduct, saving, form,
-      confirmVisible,
-      loadProducts, openCreate, openEdit, handleSave,
+      confirmVisible, deleteTarget,
+      loadProducts, openCreate, openEdit, closeModal, handleSave,
       confirmDeleteFn, handleDelete
     };
   }

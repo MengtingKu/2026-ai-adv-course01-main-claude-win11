@@ -13,6 +13,21 @@ createApp({
       }, 0);
     });
 
+    // 運費規則由 server 注入（單一來源 src/utils/shipping.js）；購物車尚未選配送方式，以宅配預估
+    const rules = JSON.parse(document.getElementById('app').dataset.shipping);
+    const homeFreeShipping = computed(function () {
+      return total.value >= rules.freeShippingThreshold;
+    });
+    const amountToFree = computed(function () {
+      return Math.max(rules.freeShippingThreshold - total.value, 0);
+    });
+    const freeProgress = computed(function () {
+      return Math.min(total.value / rules.freeShippingThreshold, 1);
+    });
+    const estimatedShipping = computed(function () {
+      return homeFreeShipping.value ? 0 : rules.homeDeliveryFee;
+    });
+
     async function loadCart() {
       loading.value = true;
       try {
@@ -69,6 +84,7 @@ createApp({
 
     return {
       items, loading, total, confirmVisible,
+      rules, homeFreeShipping, amountToFree, freeProgress, estimatedShipping,
       updateQuantity, confirmDelete, handleDelete, goCheckout
     };
   }

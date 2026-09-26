@@ -26,6 +26,13 @@
 4. 回傳格式：`res.status(xxx).json({ data, error, message })`
 5. 在 `tests/` 對應測試檔加入測試案例
 
+## 新增工具模組（src/utils/）
+
+業務規則計算（如 `shipping.js` 運費）應封裝為不依賴 DB / Express 的純函式模組：
+1. 在 `src/utils/` 建立模組，費率等常數集中宣告並匯出
+2. 參數不合法時拋出自訂 Error（如 `ShippingError`），由路由轉為 400 VALIDATION_ERROR
+3. 在 `tests/` 新增獨立單元測試，並加入 `vitest.config.js` 的 `sequence.files`
+
 ## 新增 Middleware 步驟
 
 1. 在 `src/middleware/` 建立新檔案
@@ -53,6 +60,9 @@
 | `ECPAY_HASH_KEY` | 綠界 HashKey | 否 | staging 測試值 |
 | `ECPAY_HASH_IV` | 綠界 HashIV | 否 | staging 測試值 |
 | `ECPAY_ENV` | 綠界環境（`staging` / `production`） | 否 | `staging` |
+| `ECPAY_CHOOSE_PAYMENT` | 綠界 ChoosePayment（`ALL` / `Credit` / `WebATM` …） | 否 | `ALL` |
+| `DB_PATH` | SQLite 檔案路徑，或 `:memory:` | 否 | 專案根目錄 `database.sqlite`（Vitest 固定用 `:memory:`） |
+| `E2E_BASE_URL` | Playwright E2E 目標網址 | 否 | http://localhost:3001 |
 
 ## JSDoc 格式說明
 

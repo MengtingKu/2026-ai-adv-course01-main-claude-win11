@@ -1,8 +1,8 @@
-<div id="app" class="max-w-screen-xl mx-auto px-4 md:px-12 py-8 md:py-16">
+<div id="app" v-cloak data-shipping="<%= JSON.stringify(shippingRules) %>" class="max-w-screen-xl mx-auto px-4 md:px-12 py-8 md:py-16">
 
   <!-- Page header -->
   <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-1 mb-6 md:mb-10">
-    <p class="font-ui text-overline text-ink-400">購物車</p>
+    <p class="font-ui text-overline text-ink-500">購物車</p>
     <h1 class="font-display text-[28px] md:text-[52px] font-light text-ink-900 leading-none">My Cart</h1>
   </div>
 
@@ -13,25 +13,31 @@
 
   <!-- Empty -->
   <div v-else-if="items.length === 0" class="py-16 md:py-24 text-center">
-    <p class="font-display text-[48px] md:text-[64px] font-light text-ink-400 leading-none mb-4">空的</p>
-    <p class="font-ui text-[14px] text-ink-400 mb-8">快去挑選喜歡的花束吧</p>
+    <p class="font-display text-[48px] md:text-[64px] font-light text-ink-500 leading-none mb-4">空的</p>
+    <p class="font-ui text-[14px] text-ink-500 mb-8">快去挑選喜歡的花束吧</p>
     <a href="/"
-       class="font-ui text-[13px] font-medium border border-ink-900 text-ink-900 px-8 h-10 inline-flex items-center hover:bg-ink-900 hover:text-white transition-all duration-150">
+       class="m-fill m-fill-ink font-ui text-[13px] font-medium border border-ink-900 text-ink-900 px-8 h-10 inline-flex items-center hover:text-white transition-all duration-150">
       繼續購物
     </a>
   </div>
 
   <template v-else>
-    <!-- Free shipping banner -->
-    <div v-if="total < 500"
-         class="border border-cherry/30 bg-cherry/5 px-4 md:px-5 py-2 md:h-10 md:flex md:items-center md:justify-center mb-6 text-center">
-      <span class="font-ui text-[12px] md:text-[13px] text-cherry">
-        再買 <strong>NT$ {{ (500 - total).toLocaleString() }}</strong> 即可享免運費
-      </span>
-    </div>
-    <div v-else
-         class="border border-success/30 bg-success/5 px-4 md:px-5 py-2 md:h-10 md:flex md:items-center md:justify-center mb-6 text-center">
-      <span class="font-ui text-[12px] md:text-[13px] text-success">已達免運門檻</span>
+    <!-- 運費提示：規則來自 src/utils/shipping.js。免運只適用「宅配」基本運費，
+         超商取貨固定收費、偏遠 / 急件附加費不減免，因此不可只寫「已免運」 -->
+    <div class="border px-4 md:px-5 py-3 mb-6"
+         :class="homeFreeShipping ? 'border-success/30 bg-success/5' : 'border-cherry/30 bg-cherry/5'">
+      <p class="font-ui text-[13px]" :class="homeFreeShipping ? 'text-success-ink' : 'text-cherry'">
+        <template v-if="homeFreeShipping">已達宅配免運門檻，宅配到府免基本運費</template>
+        <template v-else>再買 <strong class="tabular-nums">NT$ {{ amountToFree.toLocaleString() }}</strong>，宅配到府即可免基本運費</template>
+      </p>
+      <div class="mt-2 h-[2px] bg-line-soft overflow-hidden" aria-hidden="true">
+        <div class="h-full origin-left transition-transform duration-700"
+             :class="homeFreeShipping ? 'bg-success' : 'bg-cherry'"
+             :style="{ transform: 'scaleX(' + freeProgress + ')' }"></div>
+      </div>
+      <p class="font-ui text-[12px] text-ink-600 mt-2">
+        超商取貨固定 NT$ {{ rules.convenienceStoreFee }}（不適用滿額免運）；偏遠地區 +NT$ {{ rules.remoteAreaSurcharge }}、當日急件 +NT$ {{ rules.urgentSurcharge }}，於結帳時計算
+      </p>
     </div>
 
     <div class="flex flex-col lg:flex-row gap-6 md:gap-10 items-start">
@@ -40,17 +46,18 @@
       <div class="flex-1 min-w-0">
         <!-- Column headers (desktop only) -->
         <div class="hidden md:grid grid-cols-[1fr_auto_auto_auto] gap-4 border-b border-line-soft pb-3 mb-2">
-          <span class="font-ui text-overline text-ink-400">商品</span>
-          <span class="font-ui text-overline text-ink-400 w-28 text-center">數量</span>
-          <span class="font-ui text-overline text-ink-400 w-24 text-right">小計</span>
+          <span class="font-ui text-overline text-ink-500">商品</span>
+          <span class="font-ui text-overline text-ink-500 w-28 text-center">數量</span>
+          <span class="font-ui text-overline text-ink-500 w-24 text-right">小計</span>
           <span class="w-6"></span>
         </div>
 
         <!-- Items -->
         <div
-          v-for="item in items"
+          v-for="(item, ci) in items"
           :key="item.id"
-          class="border-b border-line-soft py-4 md:py-5"
+          :style="{ '--i': ci }"
+          class="m-enter border-b border-line-soft py-4 md:py-5"
         >
           <!-- Mobile layout -->
           <div class="flex gap-3 md:hidden">
@@ -66,14 +73,14 @@
                 <!-- Qty stepper -->
                 <div class="flex items-center border border-line-strong">
                   <button @click="updateQuantity(item.id, item.quantity - 1)" :disabled="item.quantity <= 1"
-                          class="w-8 h-8 flex items-center justify-center text-ink-600 hover:bg-ink-900 hover:text-white transition-colors disabled:opacity-30">−</button>
-                  <span class="w-8 h-8 flex items-center justify-center font-ui text-[13px] text-ink-900 border-x border-line-soft">{{ item.quantity }}</span>
+                          class="m-fill m-fill-ink w-8 h-8 flex items-center justify-center text-ink-600 hover:text-white transition-colors disabled:opacity-30">−</button>
+                  <span class="w-8 h-8 flex items-center justify-center font-ui text-[13px] text-ink-900 border-x border-line-soft overflow-hidden"><span :key="item.quantity" class="m-tick inline-block">{{ item.quantity }}</span></span>
                   <button @click="updateQuantity(item.id, item.quantity + 1)" :disabled="item.quantity >= item.product.stock"
-                          class="w-8 h-8 flex items-center justify-center text-ink-600 hover:bg-ink-900 hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed">+</button>
+                          class="m-fill m-fill-ink w-8 h-8 flex items-center justify-center text-ink-600 hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed">+</button>
                 </div>
                 <div class="flex items-center gap-3">
                   <p class="font-ui text-[13px] font-medium text-ink-900">NT$ {{ (item.product.price * item.quantity).toLocaleString() }}</p>
-                  <button @click="confirmDelete(item.id)" class="text-ink-400 hover:text-error transition-colors">
+                  <button @click="confirmDelete(item.id)" class="text-ink-500 hover:text-error-ink transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                   </button>
                 </div>
@@ -91,12 +98,12 @@
               </div>
             </div>
             <div class="flex items-center border border-line-strong w-28">
-              <button @click="updateQuantity(item.id, item.quantity - 1)" :disabled="item.quantity <= 1" class="w-9 h-9 flex items-center justify-center text-ink-600 hover:bg-ink-900 hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed">−</button>
-              <span class="flex-1 h-9 flex items-center justify-center font-ui text-[14px] text-ink-900 border-x border-line-soft">{{ item.quantity }}</span>
-              <button @click="updateQuantity(item.id, item.quantity + 1)" :disabled="item.quantity >= item.product.stock" class="w-9 h-9 flex items-center justify-center text-ink-600 hover:bg-ink-900 hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed">+</button>
+              <button @click="updateQuantity(item.id, item.quantity - 1)" :disabled="item.quantity <= 1" class="m-fill m-fill-ink w-9 h-9 flex items-center justify-center text-ink-600 hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed">−</button>
+              <span class="flex-1 h-9 flex items-center justify-center font-ui text-[14px] text-ink-900 border-x border-line-soft overflow-hidden"><span :key="item.quantity" class="m-tick inline-block">{{ item.quantity }}</span></span>
+              <button @click="updateQuantity(item.id, item.quantity + 1)" :disabled="item.quantity >= item.product.stock" class="m-fill m-fill-ink w-9 h-9 flex items-center justify-center text-ink-600 hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed">+</button>
             </div>
             <p class="font-ui text-[14px] font-medium text-ink-900 w-24 text-right">NT$ {{ (item.product.price * item.quantity).toLocaleString() }}</p>
-            <button @click="confirmDelete(item.id)" class="w-6 h-6 flex items-center justify-center text-ink-400 hover:text-error transition-colors">
+            <button @click="confirmDelete(item.id)" class="w-6 h-6 flex items-center justify-center text-ink-500 hover:text-error-ink transition-colors">
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
           </div>
@@ -104,28 +111,29 @@
       </div>
 
       <!-- Summary panel -->
-      <div class="w-full lg:w-72 lg:shrink-0 border border-line-soft bg-bg-paper p-5 md:p-6">
-        <h2 class="font-ui text-overline text-ink-400 mb-5">訂單摘要</h2>
+      <div style="--i:2" class="m-enter w-full lg:w-72 lg:shrink-0 border border-line-soft bg-bg-paper p-5 md:p-6">
+        <h2 class="font-ui text-overline text-ink-500 mb-5">訂單摘要</h2>
         <div class="space-y-3 mb-4">
           <div class="flex justify-between">
             <span class="font-ui text-[13px] text-ink-600">商品小計</span>
             <span class="font-ui text-[13px] text-ink-900">NT$ {{ total.toLocaleString() }}</span>
           </div>
-          <div class="flex justify-between">
-            <span class="font-ui text-[13px] text-ink-600">運費</span>
-            <span class="font-ui text-[13px] text-ink-900">{{ total >= 500 ? '免運' : 'NT$ 150' }}</span>
+          <div class="flex justify-between gap-3">
+            <span class="font-ui text-[13px] text-ink-600">預估運費<span class="block text-[11px] text-ink-500">以宅配到府計</span></span>
+            <span class="font-ui text-[13px] text-ink-900 tabular-nums">{{ homeFreeShipping ? '免基本運費' : 'NT$ ' + rules.homeDeliveryFee }}</span>
           </div>
         </div>
-        <div class="border-t border-line-soft pt-4 flex justify-between items-center mb-5">
-          <span class="font-ui text-[14px] font-medium text-ink-900">總計</span>
-          <span class="font-display text-[22px] md:text-[24px] font-medium text-cherry">
-            NT$ {{ (total + (total >= 500 ? 0 : 150)).toLocaleString() }}
+        <div class="border-t border-line-soft pt-4 flex justify-between items-center mb-2">
+          <span class="font-ui text-[14px] font-medium text-ink-900">預估總計</span>
+          <span class="font-display text-[22px] md:text-[24px] font-medium text-cherry tabular-nums">
+            NT$ {{ (total + estimatedShipping).toLocaleString() }}
           </span>
         </div>
-        <button @click="goCheckout" class="w-full h-12 font-ui text-[13px] font-medium tracking-[1px] bg-cherry text-white hover:bg-cherry-press transition-colors duration-150">
+        <p class="font-ui text-[11px] text-ink-500 leading-relaxed mb-5">實際運費依結帳時選擇的配送方式、地區與急件需求計算</p>
+        <button @click="goCheckout" class="m-fill w-full h-12 font-ui text-[13px] font-medium tracking-[1px] bg-cherry text-white transition-colors duration-150">
           前往結帳
         </button>
-        <a href="/" class="block text-center font-ui text-[12px] text-ink-400 hover:text-ink-900 mt-3 transition-colors">
+        <a href="/" class="block text-center font-ui text-[12px] text-ink-500 hover:text-ink-900 mt-3 transition-colors">
           繼續購物
         </a>
       </div>
@@ -134,8 +142,8 @@
 
   <!-- Confirm delete dialog -->
   <div v-if="confirmVisible" class="fixed inset-0 z-50 flex items-center justify-center px-4">
-    <div class="absolute inset-0 bg-bg-dark/50" @click="confirmVisible = false"></div>
-    <div class="relative bg-bg-paper w-full max-w-sm mx-4 p-6 md:p-8 border border-line-soft">
+    <div class="m-fade absolute inset-0 bg-bg-dark/50" @click="confirmVisible = false"></div>
+    <div class="m-enter relative bg-bg-paper w-full max-w-sm mx-4 p-6 md:p-8 border border-line-soft">
       <h3 class="font-display text-[22px] md:text-[24px] font-light text-ink-900 mb-2">確認移除</h3>
       <div class="w-8 h-[2px] bg-cherry mb-4"></div>
       <p class="font-ui text-[14px] text-ink-600 mb-6 md:mb-7">確定要從購物車中移除這個商品嗎？</p>
