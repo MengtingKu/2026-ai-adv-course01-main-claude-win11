@@ -19,7 +19,7 @@ function renderAdmin(res, page, locals = {}) {
 
 // Front pages
 router.get('/', function (req, res) {
-  renderFront(res, 'index', { title: '首頁', pageScript: 'index' });
+  renderFront(res, 'index', { title: '首頁', pageScript: 'index', fullWidth: true });
 });
 
 router.get('/products/:id', function (req, res) {
