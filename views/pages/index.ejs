@@ -1,4 +1,4 @@
-<div id="app">
+<div id="app" v-cloak class="m-home">
 
   <!-- ══════════════════════════════════════════
        HERO
@@ -12,7 +12,7 @@
       <img
         src="https://images.unsplash.com/photo-1487530811176-3780de880c2d?w=800&q=80"
         alt=""
-        class="w-full h-full object-cover"
+        class="m-kenburns w-full h-full object-cover"
       />
       <div class="absolute inset-0 bg-bg-dark/72"></div>
     </div>
@@ -21,37 +21,41 @@
     <div class="relative z-10 flex flex-col justify-end
                 w-full md:w-[52%] md:bg-bg-dark md:shrink-0
                 px-6 md:px-16 pb-10 md:pb-16 h-full">
-      <!-- Vertical BLOOM label (desktop only) -->
-      <span class="hidden md:block absolute left-5 top-1/2 -translate-y-1/2 -rotate-90 font-ui text-[10px] font-medium tracking-[4px] text-ink-400 uppercase select-none">
+      <!-- Vertical BLOOM label (desktop only)
+           用 writing-mode 直排而非 -rotate-90：旋轉不改變排版盒寬度（約 104px），
+           以中心旋轉後會往右延伸壓到 px-16 的標題；直排後盒寬只剩一行字高 -->
+      <span style="--d:1300ms" class="m-fade hidden md:block absolute left-6 top-1/2 -translate-y-1/2 rotate-180 [writing-mode:vertical-rl] font-ui text-[10px] font-medium tracking-[4px] text-ink-400 uppercase select-none">
         BLOOM&nbsp;&nbsp;2025
       </span>
       <!-- Headline -->
-      <div class="mb-5 md:mb-6">
-        <p class="font-ui text-overline text-white/50 md:text-ink-400 mb-4">精品花藝・當代生活</p>
+      <div class="mb-5 md:mb-6" data-parallax="0.14">
+        <p style="--d:150ms" class="m-rise font-ui text-overline text-white/50 md:text-ink-400 mb-4">精品花藝・當代生活</p>
         <h1 class="font-display text-[42px] sm:text-[54px] md:text-[76px] font-light leading-[1.05] text-white tracking-tight">
-          讓每一束花，<br>成為生活的詩<span class="text-cherry">。</span>
+          <span class="m-line"><span style="--d:260ms">讓每一束花，</span></span>
+          <span class="m-line"><span style="--d:400ms">成為生活的詩<span class="text-cherry">。</span></span></span>
         </h1>
       </div>
-      <div class="w-10 h-[2px] bg-cherry mb-5 md:mb-6"></div>
-      <p class="hidden md:block font-ui text-[15px] leading-[1.7] text-white/50 mb-10 max-w-[360px]">
+      <div style="--d:760ms" class="m-seam w-10 h-[2px] bg-cherry mb-5 md:mb-6"></div>
+      <p style="--d:880ms" data-parallax="0.09" class="m-rise hidden md:block font-ui text-[15px] leading-[1.7] text-white/50 mb-10 max-w-[360px]">
         精選當季花材，為每個特別時刻<br>訂製一束情意
       </p>
-      <div class="flex items-center gap-6 md:gap-8">
+      <div style="--d:1000ms" data-parallax="0.05" class="m-rise flex items-center gap-6 md:gap-8">
         <a href="#products"
-           class="font-ui text-[13px] font-medium tracking-[1px] bg-cherry text-white px-6 md:px-8 h-11 md:h-12 flex items-center hover:bg-cherry-press transition-colors duration-150">
+           class="m-fill font-ui text-[13px] font-medium tracking-[1px] bg-cherry text-white px-6 md:px-8 h-11 md:h-12 flex items-center transition-colors duration-150">
           探索商品
         </a>
-        <span class="font-ui text-[10px] tracking-[3px] text-white/25 uppercase hidden sm:block">↓&nbsp;&nbsp;Scroll</span>
+        <span class="font-ui text-[10px] tracking-[3px] text-white/60 uppercase hidden sm:block"><span class="m-nudge">↓</span>&nbsp;&nbsp;Scroll</span>
       </div>
     </div>
 
     <!-- Right: full-bleed image (desktop only) -->
-    <div class="relative flex-1 overflow-hidden hidden md:block">
-      <div class="absolute left-0 top-0 w-[3px] h-full bg-cherry z-10"></div>
+    <div style="--d:80ms" class="m-curtain relative flex-1 overflow-hidden hidden md:block">
+      <div style="--d:600ms" class="m-seam-y absolute left-0 top-0 w-[3px] h-full bg-cherry z-10"></div>
       <img
         src="https://images.unsplash.com/photo-1487530811176-3780de880c2d?w=900&q=80"
         alt="花漾生活"
-        class="w-full h-full object-cover"
+        fetchpriority="high"
+        class="m-kenburns w-full h-full object-cover"
       />
     </div>
   </section>
@@ -59,8 +63,11 @@
   <!-- ══════════════════════════════════════════
        MARQUEE STRIP
        ══════════════════════════════════════════ -->
-  <div class="bg-cherry overflow-hidden">
-    <div class="flex items-center gap-8 md:gap-12 px-4 md:px-12 h-10 md:h-12 whitespace-nowrap">
+  <div class="m-marquee bg-cherry overflow-hidden">
+    <div class="px-4 md:px-12 h-10 md:h-12 whitespace-nowrap flex items-center">
+    <div class="m-marquee-track">
+    <% for(let half=0; half<2; half++) { %>
+    <div class="flex items-center gap-8 md:gap-12 pr-8 md:pr-12" <%- half ? 'aria-hidden="true"' : '' %>>
       <% for(let i=0; i<4; i++) { %>
         <span class="font-ui text-[10px] md:text-[11px] font-medium tracking-[3px] text-white uppercase">精選花材</span>
         <span class="text-white/40 text-[8px]">✦</span>
@@ -72,6 +79,9 @@
         <span class="text-white/40 text-[8px]">✦</span>
       <% } %>
     </div>
+    <% } %>
+    </div>
+    </div>
   </div>
 
   <!-- ══════════════════════════════════════════
@@ -82,8 +92,8 @@
   <section class="max-w-7xl mx-auto px-4 md:px-12 py-10 md:py-20">
     <!-- Section header -->
     <div class="flex items-end justify-between mb-6 md:mb-10">
-      <p class="font-ui text-overline text-ink-400">01 &nbsp;/&nbsp; COLLECTION</p>
-      <h2 class="font-display text-[28px] md:text-[52px] font-light text-ink-900 leading-none">當季精選</h2>
+      <p data-reveal class="font-ui text-overline text-ink-500">01 &nbsp;/&nbsp; COLLECTION</p>
+      <h2 data-reveal style="--i:1" class="font-display text-[28px] md:text-[52px] font-light text-ink-900 leading-none">當季精選</h2>
     </div>
 
     <div v-if="products.length > 0">
@@ -92,7 +102,7 @@
         <div
           v-for="(product, idx) in products.slice(0, 4)"
           :key="product.id"
-          class="relative overflow-hidden cursor-pointer group aspect-3/4"
+          data-reveal :style="{ '--i': idx }" :data-prefetch="'/products/' + product.id" class="relative overflow-hidden cursor-pointer group m-shine aspect-3/4"
           @click="goToProduct(product.id)"
         >
           <img
@@ -101,9 +111,9 @@
             class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
           />
           <div class="absolute inset-0 bg-linear-to-t from-bg-dark/75 via-transparent to-transparent"></div>
-          <div class="absolute bottom-3 left-3 right-3">
+          <div class="m-caption absolute bottom-3 left-3 right-3">
             <p class="font-display text-[15px] font-medium text-white leading-tight truncate">{{ product.name }}</p>
-            <p class="font-ui text-[12px] text-cherry">NT$ {{ product.price.toLocaleString() }}</p>
+            <p class="font-ui text-[12px] text-cherry-light">NT$ {{ product.price.toLocaleString() }}</p>
           </div>
         </div>
       </div>
@@ -113,7 +123,7 @@
         <!-- Row 1: large hero card + 2 stacked -->
         <div class="flex gap-4 h-[620px] mb-4">
           <div
-            class="relative flex-3 overflow-hidden cursor-pointer group"
+            data-reveal="clip" :data-prefetch="'/products/' + products[0].id" class="relative flex-3 overflow-hidden cursor-pointer group m-shine"
             @click="goToProduct(products[0].id)"
             v-if="products[0]"
           >
@@ -123,34 +133,34 @@
               class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
             />
             <div class="absolute inset-0 bg-linear-to-t from-bg-dark/75 via-transparent to-transparent"></div>
-            <div class="absolute bottom-6 left-6">
+            <div class="m-caption absolute bottom-6 left-6">
               <p class="font-display text-[28px] font-medium text-white leading-tight mb-1">{{ products[0].name }}</p>
-              <p class="font-ui text-[14px] text-cherry font-medium">NT$ {{ products[0].price.toLocaleString() }}</p>
+              <p class="font-ui text-[14px] text-cherry-light font-medium">NT$ {{ products[0].price.toLocaleString() }}</p>
             </div>
           </div>
           <div class="flex flex-col gap-4 flex-[1.4]">
             <div
-              class="relative flex-1 overflow-hidden cursor-pointer group"
+              data-reveal style="--i:2" :data-prefetch="'/products/' + products[1].id" class="relative flex-1 overflow-hidden cursor-pointer group m-shine"
               @click="goToProduct(products[1].id)"
               v-if="products[1]"
             >
               <img :src="products[1].image_url || featuredImages[1]" :alt="products[1].name" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
               <div class="absolute inset-0 bg-linear-to-t from-bg-dark/65 via-transparent to-transparent"></div>
-              <div class="absolute bottom-4 left-4">
+              <div class="m-caption absolute bottom-4 left-4">
                 <p class="font-display text-[20px] font-medium text-white leading-tight">{{ products[1].name }}</p>
-                <p class="font-ui text-[12px] text-cherry">NT$ {{ products[1].price.toLocaleString() }}</p>
+                <p class="font-ui text-[12px] text-cherry-light">NT$ {{ products[1].price.toLocaleString() }}</p>
               </div>
             </div>
             <div
-              class="relative flex-1 overflow-hidden cursor-pointer group"
+              data-reveal style="--i:3" :data-prefetch="'/products/' + products[2].id" class="relative flex-1 overflow-hidden cursor-pointer group m-shine"
               @click="goToProduct(products[2].id)"
               v-if="products[2]"
             >
               <img :src="products[2].image_url || featuredImages[2]" :alt="products[2].name" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
               <div class="absolute inset-0 bg-linear-to-t from-bg-dark/65 via-transparent to-transparent"></div>
-              <div class="absolute bottom-4 left-4">
+              <div class="m-caption absolute bottom-4 left-4">
                 <p class="font-display text-[20px] font-medium text-white leading-tight">{{ products[2].name }}</p>
-                <p class="font-ui text-[12px] text-cherry">NT$ {{ products[2].price.toLocaleString() }}</p>
+                <p class="font-ui text-[12px] text-cherry-light">NT$ {{ products[2].price.toLocaleString() }}</p>
               </div>
             </div>
           </div>
@@ -158,16 +168,16 @@
         <!-- Row 2 -->
         <div class="flex gap-4 h-[380px]" v-if="products.length > 3">
           <div
-            v-for="product in products.slice(3, 5)"
+            v-for="(product, ri) in products.slice(3, 5)"
             :key="product.id"
-            class="relative flex-1 overflow-hidden cursor-pointer group"
+            data-reveal :style="{ '--i': ri + 1 }" :data-prefetch="'/products/' + product.id" class="relative flex-1 overflow-hidden cursor-pointer group m-shine"
             @click="goToProduct(product.id)"
           >
             <img :src="product.image_url || 'https://images.unsplash.com/photo-1490750967868-88aa4f44baee?w=600&q=80'" :alt="product.name" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
             <div class="absolute inset-0 bg-linear-to-t from-bg-dark/70 via-transparent to-transparent"></div>
-            <div class="absolute bottom-5 left-5 right-5 flex items-end justify-between">
+            <div class="m-caption absolute bottom-5 left-5 right-5 flex items-end justify-between">
               <p class="font-display text-[22px] font-medium text-white">{{ product.name }}</p>
-              <p class="font-ui text-[13px] text-cherry shrink-0 ml-4">NT$ {{ product.price.toLocaleString() }}</p>
+              <p class="font-ui text-[13px] text-cherry-light shrink-0 ml-4">NT$ {{ product.price.toLocaleString() }}</p>
             </div>
           </div>
         </div>
@@ -178,7 +188,7 @@
     <div class="flex items-center gap-6 mt-6 md:mt-8">
       <div class="flex-1 h-px bg-line-soft"></div>
       <a href="#products" class="font-ui text-[13px] font-medium tracking-[1px] text-ink-600 hover:text-ink-900 transition-colors whitespace-nowrap">
-        查看全部商品 &nbsp;→
+        查看全部商品 &nbsp;<span class="m-arrow">→</span>
       </a>
     </div>
   </section>
@@ -188,11 +198,11 @@
        Mobile: 2×2 grid
        Desktop: 4-across flex
        ══════════════════════════════════════════ -->
-  <section class="bg-bg-dark">
+  <section id="occasion" class="bg-bg-dark">
     <!-- Header -->
     <div class="max-w-7xl mx-auto px-4 md:px-12 pt-10 md:pt-16 pb-6 md:pb-10 flex items-end justify-between">
-      <p class="font-ui text-overline text-ink-400">02 &nbsp;/&nbsp; OCCASION</p>
-      <h2 class="font-display text-[28px] md:text-[52px] font-light text-white leading-none">以場合挑選</h2>
+      <p data-reveal class="font-ui text-overline text-ink-400">02 &nbsp;/&nbsp; OCCASION</p>
+      <h2 data-reveal style="--i:1" class="font-display text-[28px] md:text-[52px] font-light text-white leading-none">以場合挑選</h2>
     </div>
 
     <!-- Tiles: 2-col mobile, 4-col desktop -->
@@ -203,15 +213,15 @@
       {num:'04', label:'感謝致意', en:'Gratitude', img:'https://images.unsplash.com/photo-1780026776296-601bf1f3e557?w=400&q=80'},
     ]; %>
     <div class="grid grid-cols-2 md:flex h-auto md:h-[440px]">
-      <% occasions.forEach(occ => { %>
-        <a href="/" class="relative overflow-hidden group cursor-pointer block aspect-square md:aspect-auto md:flex-1">
+      <% occasions.forEach((occ, oi) => { %>
+        <a href="/" data-reveal style="--i:<%= oi %>" class="m-shine relative overflow-hidden group cursor-pointer block aspect-square md:aspect-auto md:flex-1">
           <img src="<%= occ.img %>" alt="<%= occ.label %>" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
           <div class="absolute inset-0 bg-linear-to-t from-bg-dark/80 via-bg-dark/20 to-transparent"></div>
           <span class="absolute top-3 left-3 font-display text-[48px] md:text-[72px] font-light text-white/10 leading-none select-none"><%= occ.num %></span>
-          <div class="absolute bottom-4 left-4 md:bottom-6 md:left-5">
-            <p class="font-ui text-overline text-cherry mb-1"><%= occ.en %></p>
+          <div class="m-caption absolute bottom-4 left-4 md:bottom-6 md:left-5">
+            <p class="font-ui text-overline text-cherry-light mb-1"><%= occ.en %></p>
             <p class="font-display text-[18px] md:text-[26px] font-light text-white leading-tight"><%= occ.label %></p>
-            <p class="font-ui text-[12px] text-white/40 mt-1 md:mt-2 group-hover:text-white/70 transition-colors">→</p>
+            <p class="font-ui text-[12px] text-white/70 mt-1 md:mt-2 group-hover:text-white transition-colors"><span class="m-arrow">→</span></p>
           </div>
         </a>
       <% }); %>
@@ -220,7 +230,7 @@
     <!-- Strip bar -->
     <div class="max-w-7xl mx-auto px-4 md:px-12 py-4 md:py-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-t border-white/10">
       <p class="font-ui text-[11px] md:text-[12px] tracking-[2px] text-ink-400">免費包裝&nbsp;&nbsp;·&nbsp;&nbsp;當日配送&nbsp;&nbsp;·&nbsp;&nbsp;全台寄送&nbsp;&nbsp;·&nbsp;&nbsp;訂製服務</p>
-      <a href="#" class="font-ui text-[12px] tracking-[1px] text-white hover:text-white/70 transition-colors whitespace-nowrap">了解更多 →</a>
+      <a href="#" class="font-ui text-[12px] tracking-[1px] text-white hover:text-white/70 transition-colors whitespace-nowrap">了解更多 <span class="m-arrow">→</span></a>
     </div>
   </section>
 
@@ -229,25 +239,26 @@
        Mobile: stacked (image top, text bottom)
        Desktop: split left-image / right-text
        ══════════════════════════════════════════ -->
-  <section class="flex flex-col md:flex-row md:h-[460px]">
-    <div class="w-full md:w-[44%] md:shrink-0 h-[260px] md:h-auto overflow-hidden">
+  <section id="story" class="flex flex-col md:flex-row md:h-[460px]">
+    <div data-reveal="clip" class="w-full md:w-[44%] md:shrink-0 h-[260px] md:h-auto overflow-hidden">
       <img
         src="https://images.unsplash.com/photo-1508610048659-a06b669e3321?w=700&q=80"
         alt="花漾生活品牌故事"
+        loading="lazy"
         class="w-full h-full object-cover"
       />
     </div>
     <div class="flex-1 bg-bg-paper flex flex-col justify-center px-6 md:px-16 py-10 md:py-12">
-      <p class="font-ui text-overline text-ink-400 mb-5 md:mb-6">03 &nbsp;/&nbsp; OUR STORY</p>
-      <h2 class="font-display text-[30px] md:text-[44px] font-light text-ink-900 leading-[1.1] mb-5 md:mb-6">
+      <p data-reveal style="--i:2" class="font-ui text-overline text-ink-500 mb-5 md:mb-6">03 &nbsp;/&nbsp; OUR STORY</p>
+      <h2 data-reveal style="--i:3" class="font-display text-[30px] md:text-[44px] font-light text-ink-900 leading-[1.1] mb-5 md:mb-6">
         每一束花，<br>都是一封情書
       </h2>
-      <div class="w-10 h-[2px] bg-cherry mb-5 md:mb-6"></div>
-      <p class="font-ui text-[14px] md:text-[15px] leading-[1.7] text-ink-600 mb-7 md:mb-8 max-w-[420px]">
+      <div data-reveal style="--i:4" class="w-10 h-[2px] bg-cherry mb-5 md:mb-6"></div>
+      <p data-reveal style="--i:5" class="font-ui text-[14px] md:text-[15px] leading-[1.7] text-ink-600 mb-7 md:mb-8 max-w-[420px]">
         花漾生活成立於 2018 年，專注於將當代花藝美學帶入台灣日常生活。
         我們相信，一束精心設計的鮮花，能夠捕捉最微妙的情感與時刻。
       </p>
-      <a href="#" class="font-ui text-[14px] font-medium border border-ink-900 text-ink-900 px-6 h-10 flex items-center w-fit hover:bg-ink-900 hover:text-white transition-all duration-150">
+      <a href="#" data-reveal style="--i:6" class="m-fill m-fill-ink font-ui text-[14px] font-medium border border-ink-900 text-ink-900 px-6 h-10 flex items-center w-fit hover:text-white transition-all duration-150">
         認識我們
       </a>
     </div>
@@ -259,29 +270,39 @@
   <section id="products" class="max-w-7xl mx-auto px-4 md:px-12 py-10 md:py-20">
     <!-- Section header -->
     <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-1 mb-6 md:mb-10">
-      <p class="font-ui text-overline text-ink-400">04 &nbsp;/&nbsp; ALL PRODUCTS</p>
-      <h2 class="font-display text-[28px] md:text-[52px] font-light text-ink-900 leading-none">探索所有花藝</h2>
+      <p data-reveal class="font-ui text-overline text-ink-500">04 &nbsp;/&nbsp; ALL PRODUCTS</p>
+      <h2 data-reveal style="--i:1" class="font-display text-[28px] md:text-[52px] font-light text-ink-900 leading-none">探索所有花藝</h2>
     </div>
 
     <!-- Loading -->
-    <div v-if="loading" class="flex justify-center py-16">
-      <div class="w-6 h-6 border-2 border-ink-900 border-t-transparent rounded-full animate-spin"></div>
+    <!-- Skeleton：與最終格線同尺寸，避免載入後版面跳動 -->
+    <div v-if="loading" class="grid grid-cols-2 md:grid-cols-3 gap-x-3 md:gap-x-6 gap-y-8 md:gap-y-12" aria-busy="true" aria-label="商品載入中">
+      <div v-for="n in 6" :key="'sk' + n">
+        <div class="m-skeleton mb-3 md:mb-4 aspect-4/5"></div>
+        <div class="border-t border-line-soft pt-3 space-y-2">
+          <div class="m-skeleton h-[14px] w-3/5"></div>
+          <div class="m-skeleton h-[14px] w-1/4"></div>
+        </div>
+      </div>
     </div>
 
     <template v-else>
       <div v-if="products.length === 0" class="text-center py-20">
-        <p class="font-display text-[32px] font-light text-ink-400 mb-3">目前沒有商品</p>
-        <p class="font-ui text-[14px] text-ink-400">請稍後再來看看</p>
+        <p class="font-display text-[32px] font-light text-ink-500 mb-3">目前沒有商品</p>
+        <p class="font-ui text-[14px] text-ink-500">請稍後再來看看</p>
       </div>
 
       <div v-else class="grid grid-cols-2 md:grid-cols-3 gap-x-3 md:gap-x-6 gap-y-8 md:gap-y-12">
         <div
-          v-for="product in products"
+          v-for="(product, gi) in products"
           :key="product.id"
+          data-reveal
+          :style="{ '--i': gi % 3 }"
+          :data-prefetch="'/products/' + product.id"
           class="group cursor-pointer"
           @click="goToProduct(product.id)"
         >
-          <div class="overflow-hidden mb-3 md:mb-4 aspect-4/5 relative">
+          <div class="m-shine overflow-hidden mb-3 md:mb-4 aspect-4/5 relative bg-bg-raised">
             <img
               :src="product.image_url || 'https://images.unsplash.com/photo-1490750967868-88aa4f44baee?w=500&q=80'"
               :alt="product.name"
@@ -292,16 +313,17 @@
               <span class="font-ui text-overline text-white">售完</span>
             </div>
           </div>
-          <div class="border-t border-line-soft pt-3">
+          <div class="border-t border-line-soft group-hover:border-ink-900 transition-colors duration-500 pt-3">
             <h3 class="font-ui text-[13px] md:text-[15px] font-medium text-ink-900 mb-1 truncate">{{ product.name }}</h3>
             <div class="flex items-center justify-between">
               <p class="font-ui text-[13px] md:text-[15px] font-medium text-cherry">NT$ {{ product.price.toLocaleString() }}</p>
               <button
                 @click.stop="addToCart(product)"
                 :disabled="product._adding || product.stock <= 0"
-                class="font-ui text-[12px] md:text-[13px] text-ink-600 hover:text-ink-900 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                class="m-underline font-ui text-[12px] md:text-[13px] text-ink-600 hover:text-ink-900 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
               >
-                {{ product.stock <= 0 ? '售完' : '加入 →' }}
+                <template v-if="product.stock <= 0">售完</template>
+                <template v-else>加入 <span class="m-arrow">→</span></template>
               </button>
             </div>
           </div>

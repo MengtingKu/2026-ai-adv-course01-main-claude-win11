@@ -2,6 +2,32 @@
 
 ## [未發布]
 
+### 新增
+- **Motion 動效層**（參考 Noir Fashion，版型不變）：`public/css/input.css` motion tokens / keyframes、`public/js/motion.js`
+  - 首頁 hero 逐行遮罩進場、Ken Burns、cherry 描線、文字視差；跑馬燈無縫循環（hover 暫停）
+  - 捲動揭示（IntersectionObserver，stagger）、卡片光澤掃過、按鈕填色擦入、連結底線生長、箭頭位移
+  - 跨頁 View Transitions、商品列表 / 商品詳情 skeleton、圖片載入淡入、hover 預取商品頁、購物車角標彈跳、數量數字滾動
+  - `prefers-reduced-motion` 全面停用動效
+- **Mobile navbar**：漢堡（兩線 → X）+ 全螢幕選單（布幕展開、編號大字連結、購物車數量、帳號區塊），焦點鎖定 / Esc 關閉 / 捲動鎖定，觸控區 ≥44px
+- **後台重新設計**：桌機深色側欄 + 淺色工作列；手機深色品牌列 + 底部分頁列
+  - 商品：桌機表格 / 手機卡片、庫存偏低 / 售完標籤、右側抽屜表單（含圖片預覽）、刪除確認顯示商品名
+  - 訂單：狀態篩選 chips、桌機表格（可鍵盤操作）/ 手機卡片、右側抽屜明細（含配送方式、運費、急件 / 偏遠標記）
+- 色彩 token：`ink-500`、`success-ink`、`warning-ink`、`error-ink`（對比 ≥4.5:1）；全域 `:focus-visible` 焦點環
+
+### 變更
+- **全站對比達 WCAG AA**：`cherry` `#D6435B`→`#B8354C`、`cherry-press`→`#962A3E`，新增 `cherry-light`（深底文字）；淺底輔助文字 `ink-400`→`ink-500`、狀態文字改用 `*-ink`、hero「Scroll」與場合箭頭提高亮度
+- **導覽列錨點**：商品 / 場合 / 關於連到首頁 `#products` / `#occasion` / `#story`（桌機、手機選單、footer 一致），平滑捲動避開 sticky header、scroll-spy 標示目前區塊；由其他頁帶錨點進入時，商品載入後重新定位
+- 後台商品 / 訂單：≥1200px 才顯示表格，以下改卡片（640–1199px 兩欄，適配摺疊機 / 平板）
+
+### 修正
+- **購物車運費誤導**：原本寫死「滿 500 免運、運費 150」，與 `src/utils/shipping.js` 不符。改由 server 注入運費規則（單一來源），購物車以宅配預估並標示差額 / 進度，明列超商取貨不適用免運、偏遠 / 急件另計；商品頁與結帳頁的金額說明同步改為引用規則
+- 後台庫存欄：「偏低」標籤改放數字左側、數字固定寬度靠右，個位數對齊不受標籤影響
+- 首頁 hero 直排「BLOOM 2025」壓到標題：`-rotate-90` 不改變排版盒寬度，改用 `writing-mode: vertical-rl`
+- 後台沿用已移除的舊 token（`rose-*`、`bg-cream`、`text-text-*`），按鈕 / 標籤失去樣式；並移除後台中的前台 footer
+- `notification.js` 使用已不存在的 token（`bg-sage`、`rounded-xl`）導致 toast 無底色 → 改為直角深底 + 機能色條
+- `header-init.js` 登入後注入舊 `rose-*` 類別 → 改用現行 header 樣式，使用者名稱改以 `textContent` 輸出（避免 XSS）
+- Vue 頁面加上 `v-cloak`，避免掛載前閃現 `{{ }}` 模板
+
 ## [1.4.0] - 2026-09-26
 
 ### 新增

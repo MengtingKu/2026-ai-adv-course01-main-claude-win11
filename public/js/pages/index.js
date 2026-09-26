@@ -1,4 +1,4 @@
-const { createApp, ref, onMounted } = Vue;
+const { createApp, ref, onMounted, nextTick } = Vue;
 
 createApp({
   setup() {
@@ -57,8 +57,14 @@ createApp({
       }
     }
 
-    onMounted(function () {
-      loadProducts(1);
+    onMounted(async function () {
+      await loadProducts(1);
+      // 從其他頁面帶 #products 等錨點進來時，商品載入後精選區會長高，把目標往下推 → 重新定位
+      if (location.hash) {
+        await nextTick();
+        var target = document.getElementById(location.hash.slice(1));
+        if (target) target.scrollIntoView({ behavior: 'instant', block: 'start' });
+      }
     });
 
     return {

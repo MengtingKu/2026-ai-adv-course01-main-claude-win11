@@ -1,5 +1,21 @@
 const express = require('express');
 const router = express.Router();
+const {
+  HOME_DELIVERY_BASE_FEE,
+  CONVENIENCE_STORE_FEE,
+  FREE_SHIPPING_THRESHOLD,
+  REMOTE_AREA_SURCHARGE,
+  URGENT_SURCHARGE
+} = require('../utils/shipping');
+
+// 頁面顯示用的運費規則，單一來源為 src/utils/shipping.js（避免前端寫死金額）
+const shippingRules = {
+  homeDeliveryFee: HOME_DELIVERY_BASE_FEE,
+  convenienceStoreFee: CONVENIENCE_STORE_FEE,
+  freeShippingThreshold: FREE_SHIPPING_THRESHOLD,
+  remoteAreaSurcharge: REMOTE_AREA_SURCHARGE,
+  urgentSurcharge: URGENT_SURCHARGE
+};
 
 // Helper to render with front layout
 function renderFront(res, page, locals = {}) {
@@ -26,16 +42,17 @@ router.get('/products/:id', function (req, res) {
   renderFront(res, 'product-detail', {
     title: '商品詳情',
     pageScript: 'product-detail',
-    productId: req.params.id
+    productId: req.params.id,
+    shippingRules
   });
 });
 
 router.get('/cart', function (req, res) {
-  renderFront(res, 'cart', { title: '購物車', pageScript: 'cart' });
+  renderFront(res, 'cart', { title: '購物車', pageScript: 'cart', shippingRules });
 });
 
 router.get('/checkout', function (req, res) {
-  renderFront(res, 'checkout', { title: '結帳', pageScript: 'checkout' });
+  renderFront(res, 'checkout', { title: '結帳', pageScript: 'checkout', shippingRules });
 });
 
 router.get('/login', function (req, res) {

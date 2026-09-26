@@ -1,15 +1,24 @@
-<div id="app" data-product-id="<%= productId %>" class="max-w-screen-xl mx-auto px-4 md:px-12 py-8 md:py-16">
+<div id="app" v-cloak data-product-id="<%= productId %>" class="max-w-screen-xl mx-auto px-4 md:px-12 py-8 md:py-16">
 
-  <!-- Loading -->
-  <div v-if="loading" class="flex justify-center py-24">
-    <div class="w-6 h-6 border-2 border-ink-900 border-t-transparent rounded-full animate-spin"></div>
+  <!-- Loading：與商品版型同比例的 skeleton -->
+  <div v-if="loading" class="flex flex-col md:flex-row gap-6 md:gap-14" aria-busy="true" aria-label="商品載入中">
+    <div class="w-full md:w-[55%] md:shrink-0">
+      <div class="m-skeleton aspect-[4/5]"></div>
+    </div>
+    <div class="flex flex-col justify-center flex-1 pt-2 space-y-5">
+      <div class="m-skeleton h-3 w-24"></div>
+      <div class="m-skeleton h-10 md:h-14 w-4/5"></div>
+      <div class="m-skeleton h-7 w-32"></div>
+      <div class="m-skeleton h-20 w-full"></div>
+      <div class="m-skeleton h-12 md:h-14 w-full"></div>
+    </div>
   </div>
 
   <!-- Not found -->
   <div v-else-if="notFound" class="flex flex-col items-center py-24 text-center">
-    <span class="font-display text-[80px] font-light text-ink-400 leading-none mb-4">404</span>
+    <span class="font-display text-[80px] font-light text-ink-500 leading-none mb-4">404</span>
     <p class="font-ui text-[15px] text-ink-600 mb-6">找不到此商品</p>
-    <a href="/" class="font-ui text-[13px] border border-ink-900 text-ink-900 px-6 h-10 flex items-center hover:bg-ink-900 hover:text-white transition-all duration-150">
+    <a href="/" class="m-fill m-fill-ink font-ui text-[13px] border border-ink-900 text-ink-900 px-6 h-10 flex items-center hover:text-white transition-all duration-150">
       回到首頁
     </a>
   </div>
@@ -19,19 +28,20 @@
 
     <!-- Left: Image -->
     <div class="w-full md:w-[55%] md:shrink-0">
-      <div class="overflow-hidden aspect-[4/5]">
+      <div class="m-curtain m-shine group overflow-hidden aspect-[4/5] bg-bg-raised">
         <img
           :src="product.image_url || 'https://images.unsplash.com/photo-1490750967868-88aa4f44baee?w=800&q=80'"
           :alt="product.name"
-          class="w-full h-full object-cover"
+          fetchpriority="high"
+          class="w-full h-full object-cover group-hover:scale-[1.03]"
         />
       </div>
     </div>
 
     <!-- Right: Info -->
-    <div class="flex flex-col justify-center flex-1 pt-2">
+    <div class="m-stagger flex flex-col justify-center flex-1 pt-2" style="--m-base:240ms">
       <!-- Breadcrumb -->
-      <p class="font-ui text-overline text-ink-400 mb-5 md:mb-6">
+      <p class="font-ui text-overline text-ink-500 mb-5 md:mb-6">
         <a href="/" class="hover:text-ink-900 transition-colors">首頁</a>
         <span class="mx-3 text-line-soft">/</span>
         商品詳情
@@ -52,10 +62,10 @@
 
       <!-- Stock badge -->
       <div class="mb-5 md:mb-6">
-        <span v-if="product.stock > 0" class="font-ui text-[12px] text-success border border-success/30 bg-success/5 px-3 py-1">
+        <span v-if="product.stock > 0" class="font-ui text-[12px] text-success-ink border border-success/30 bg-success/5 px-3 py-1">
           尚有 {{ product.stock }} 件
         </span>
-        <span v-else class="font-ui text-[12px] text-error border border-error/30 bg-error/5 px-3 py-1">
+        <span v-else class="font-ui text-[12px] text-error-ink border border-error/30 bg-error/5 px-3 py-1">
           已售完
         </span>
       </div>
@@ -70,11 +80,11 @@
 
       <!-- Quantity -->
       <div class="flex items-center gap-6 mb-4 md:mb-5">
-        <span class="font-ui text-[12px] tracking-[1px] text-ink-400 uppercase w-12">數量</span>
+        <span class="font-ui text-[12px] tracking-[1px] text-ink-500 uppercase w-12">數量</span>
         <div class="flex items-center border border-line-strong">
-          <button @click="decrease" class="w-10 h-10 flex items-center justify-center text-ink-600 hover:bg-ink-900 hover:text-white transition-colors duration-150">−</button>
-          <span class="w-12 h-10 flex items-center justify-center font-ui text-[14px] text-ink-900 border-x border-line-soft">{{ quantity }}</span>
-          <button @click="increase" class="w-10 h-10 flex items-center justify-center text-ink-600 hover:bg-ink-900 hover:text-white transition-colors duration-150">+</button>
+          <button @click="decrease" class="m-fill m-fill-ink w-10 h-10 flex items-center justify-center text-ink-600 hover:text-white transition-colors duration-150">−</button>
+          <span class="w-12 h-10 flex items-center justify-center font-ui text-[14px] text-ink-900 border-x border-line-soft overflow-hidden"><span :key="quantity" class="m-tick inline-block">{{ quantity }}</span></span>
+          <button @click="increase" class="m-fill m-fill-ink w-10 h-10 flex items-center justify-center text-ink-600 hover:text-white transition-colors duration-150">+</button>
         </div>
       </div>
 
@@ -82,7 +92,7 @@
       <button
         @click="addToCart"
         :disabled="adding || product.stock <= 0"
-        class="w-full h-12 md:h-14 font-ui text-[14px] font-medium tracking-[1px] bg-cherry text-white hover:bg-cherry-press transition-colors duration-150 disabled:opacity-40 disabled:cursor-not-allowed mb-3"
+        class="m-fill w-full h-12 md:h-14 font-ui text-[14px] font-medium tracking-[1px] bg-cherry text-white transition-colors duration-150 disabled:opacity-40 disabled:cursor-not-allowed mb-3"
       >
         {{ product.stock <= 0 ? '已售完' : '加入購物車' }}
       </button>
@@ -97,12 +107,12 @@
         <% const notes = [
           {icon:'↻', text:'花材依季節供應，實際花束可能略有差異'},
           {icon:'◆', text:'台北市區可享當日配送服務'},
-          {icon:'✦', text:'消費滿 NT$ 500 享免運費優惠'},
+          {icon:'✦', text:'宅配滿 NT$ ' + shippingRules.freeShippingThreshold.toLocaleString() + ' 免基本運費（超商取貨 NT$ ' + shippingRules.convenienceStoreFee + '）'},
         ] %>
         <% notes.forEach(n => { %>
           <div class="flex items-start gap-3">
             <span class="font-ui text-[10px] text-cherry mt-1 shrink-0"><%= n.icon %></span>
-            <span class="font-ui text-[13px] text-ink-400 leading-relaxed"><%= n.text %></span>
+            <span class="font-ui text-[13px] text-ink-500 leading-relaxed"><%= n.text %></span>
           </div>
         <% }) %>
       </div>

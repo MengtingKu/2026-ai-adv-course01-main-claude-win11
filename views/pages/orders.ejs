@@ -1,8 +1,8 @@
-<div id="app" class="max-w-screen-xl mx-auto px-4 md:px-12 py-8 md:py-16">
+<div id="app" v-cloak class="max-w-screen-xl mx-auto px-4 md:px-12 py-8 md:py-16">
 
   <!-- Page header -->
   <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-1 mb-6 md:mb-10">
-    <p class="font-ui text-overline text-ink-400">訂單記錄</p>
+    <p class="font-ui text-overline text-ink-500">訂單記錄</p>
     <h1 class="font-display text-[28px] md:text-[52px] font-light text-ink-900 leading-none">My Orders</h1>
   </div>
 
@@ -13,10 +13,10 @@
 
   <!-- Empty -->
   <div v-else-if="orders.length === 0" class="py-24 text-center">
-    <p class="font-display text-[64px] font-light text-ink-400 leading-none mb-4">無訂單</p>
-    <p class="font-ui text-[14px] text-ink-400 mb-8">快去選購喜歡的花束吧</p>
+    <p class="font-display text-[64px] font-light text-ink-500 leading-none mb-4">無訂單</p>
+    <p class="font-ui text-[14px] text-ink-500 mb-8">快去選購喜歡的花束吧</p>
     <a href="/"
-       class="font-ui text-[13px] font-medium border border-ink-900 text-ink-900 px-8 h-10 inline-flex items-center hover:bg-ink-900 hover:text-white transition-all duration-150">
+       class="m-fill m-fill-ink font-ui text-[13px] font-medium border border-ink-900 text-ink-900 px-8 h-10 inline-flex items-center hover:text-white transition-all duration-150">
       去逛逛
     </a>
   </div>
@@ -25,30 +25,31 @@
   <div v-else>
     <!-- Column headers -->
     <div class="hidden md:grid grid-cols-[1fr_auto_auto_auto] gap-4 border-b border-line-soft pb-3 mb-0">
-      <span class="font-ui text-overline text-ink-400">訂單編號</span>
-      <span class="font-ui text-overline text-ink-400 w-28 text-center">日期</span>
-      <span class="font-ui text-overline text-ink-400 w-24 text-right">金額</span>
-      <span class="font-ui text-overline text-ink-400 w-20 text-right">狀態</span>
+      <span class="font-ui text-overline text-ink-500">訂單編號</span>
+      <span class="font-ui text-overline text-ink-500 w-28 text-center">日期</span>
+      <span class="font-ui text-overline text-ink-500 w-24 text-right">金額</span>
+      <span class="font-ui text-overline text-ink-500 w-20 text-right">狀態</span>
     </div>
 
     <a
-      v-for="order in orders"
+      v-for="(order, oi) in orders"
+      :style="{ '--i': Math.min(oi, 8) }"
       :key="order.id"
       :href="'/orders/' + order.id"
-      class="flex flex-col sm:grid sm:grid-cols-[1fr_auto_auto_auto] gap-2 sm:gap-4 items-start sm:items-center border-b border-line-soft py-4 md:py-5 group"
+      class="m-enter flex flex-col sm:grid sm:grid-cols-[1fr_auto_auto_auto] gap-2 sm:gap-4 items-start sm:items-center border-b border-line-soft py-4 md:py-5 group"
     >
       <!-- Order no + date (mobile stacked) -->
       <div>
         <p class="font-ui text-[14px] font-medium text-ink-900 group-hover:text-cherry transition-colors">
           {{ order.order_no }}
         </p>
-        <p class="font-ui text-[12px] text-ink-400 mt-0.5 md:hidden">
+        <p class="font-ui text-[12px] text-ink-500 mt-0.5 md:hidden">
           {{ new Date(order.created_at).toLocaleDateString('zh-TW') }}
         </p>
       </div>
 
       <!-- Date (desktop only) -->
-      <p class="hidden md:block font-ui text-[13px] text-ink-400 w-28 text-center">
+      <p class="hidden md:block font-ui text-[13px] text-ink-500 w-28 text-center">
         {{ new Date(order.created_at).toLocaleDateString('zh-TW') }}
       </p>
 

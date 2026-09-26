@@ -1,5 +1,5 @@
 <header class="sticky top-0 z-50 bg-bg-dark border-b border-white/10">
-  <div class="max-w-screen-xl mx-auto flex items-center justify-between px-4 md:px-12 h-[72px]">
+  <div class="max-w-screen-xl mx-auto flex items-center justify-between pl-4 pr-2 md:px-12 h-16 md:h-[72px]">
 
     <!-- Logo -->
     <a href="/" class="flex flex-col gap-0.5 leading-none group">
@@ -7,50 +7,93 @@
       <span class="font-ui text-[9px] font-medium tracking-[3px] text-ink-400 uppercase">BLOOM</span>
     </a>
 
-    <!-- Nav Links -->
-    <nav class="hidden md:flex items-center gap-10">
-      <a href="/" class="font-ui text-[13px] tracking-[1px] text-white/50 hover:text-white transition-colors duration-150">商品</a>
-      <a href="/" class="font-ui text-[13px] tracking-[1px] text-white/50 hover:text-white transition-colors duration-150">場合</a>
-      <a href="/" class="font-ui text-[13px] tracking-[1px] text-white/50 hover:text-white transition-colors duration-150">關於</a>
+    <!-- Nav Links（desktop） -->
+    <nav class="hidden md:flex items-center gap-10" aria-label="主要導覽">
+      <a href="/#products" data-nav-section="products" class="m-underline font-ui text-[13px] tracking-[1px] text-white/60 hover:text-white aria-[current=true]:text-white transition-colors duration-150">商品</a>
+      <a href="/#occasion" data-nav-section="occasion" class="m-underline font-ui text-[13px] tracking-[1px] text-white/60 hover:text-white aria-[current=true]:text-white transition-colors duration-150">場合</a>
+      <a href="/#story" data-nav-section="story" class="m-underline font-ui text-[13px] tracking-[1px] text-white/60 hover:text-white aria-[current=true]:text-white transition-colors duration-150">關於</a>
     </nav>
 
     <!-- Actions -->
-    <div class="flex items-center gap-5">
-      <!-- Search -->
-      <button class="text-white/50 hover:text-white transition-colors duration-150">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <div class="flex items-center gap-1 md:gap-5">
+      <!-- Search（desktop） -->
+      <button class="hidden md:block text-white/60 hover:text-white transition-colors duration-150" aria-label="搜尋">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
         </svg>
       </button>
 
-      <!-- Cart -->
-      <a href="/cart" class="relative text-white hover:text-white/70 transition-colors duration-150">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <!-- Cart（手機維持 44px 觸控區） -->
+      <a href="/cart" class="relative text-white hover:text-white/70 transition-colors duration-150 w-11 h-11 md:w-auto md:h-auto flex items-center justify-center" aria-label="購物車">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
           <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
         </svg>
         <span
           id="cart-badge"
-          class="absolute -top-1.5 -right-2 bg-cherry text-white text-[9px] font-bold w-[15px] h-[15px] rounded-full flex items-center justify-center leading-none"
+          class="absolute top-1.5 right-0.5 md:-top-1.5 md:-right-2 bg-cherry text-white text-[9px] font-bold min-w-[15px] h-[15px] px-[3px] rounded-full flex items-center justify-center leading-none ring-2 ring-bg-dark"
           style="display:none;"
         ></span>
       </a>
 
-      <!-- Orders (logged-in only) -->
+      <!-- Orders (logged-in only, desktop) -->
       <a id="orders-link" href="/orders"
-         class="font-ui text-[13px] tracking-[0.5px] text-white/50 hover:text-white transition-colors duration-150"
+         class="hidden md:inline font-ui text-[13px] tracking-[0.5px] text-white/60 hover:text-white transition-colors duration-150"
          style="display:none;">
         訂單
       </a>
 
-      <!-- Auth -->
-      <div id="auth-nav">
+      <!-- Auth（desktop；手機版在選單內） -->
+      <div id="auth-nav" class="hidden md:block">
         <a href="/login"
-           class="font-ui text-[13px] border border-white/20 text-white px-4 h-9 flex items-center hover:border-white/50 hover:bg-white/5 transition-all duration-150">
+           class="m-fill m-fill-ink font-ui text-[13px] border border-white/20 text-white px-4 h-9 flex items-center hover:border-white/50 transition-all duration-150"
+           style="--m-fill: rgb(255 255 255 / 0.08)">
           登入
         </a>
       </div>
+
+      <!-- Menu toggle（mobile） -->
+      <button id="menu-toggle" type="button"
+              class="md:hidden w-11 h-11 flex items-center justify-center text-white"
+              aria-label="開啟選單" aria-expanded="false" aria-controls="mobile-menu">
+        <span class="m-burger" aria-hidden="true"><span></span><span></span></span>
+      </button>
     </div>
 
   </div>
 </header>
+
+<!-- ══ Mobile menu sheet ══
+     放在 header 外：header 捲動後有 backdrop-filter，會成為 fixed 子元素的 containing block -->
+<div id="mobile-menu" class="m-sheet md:hidden fixed inset-x-0 top-16 bottom-0 z-40 bg-bg-dark text-white overflow-y-auto overscroll-contain"
+     role="dialog" aria-modal="true" aria-label="網站選單">
+  <div class="min-h-full flex flex-col px-6 pt-8 pb-[max(2rem,env(safe-area-inset-bottom))]">
+
+    <p class="m-sheet-item font-ui text-overline text-white/60 mb-6">Menu</p>
+
+    <nav aria-label="行動版導覽" class="border-t border-white/10">
+      <% [['01','商品','/#products'],['02','場合','/#occasion'],['03','關於','/#story']].forEach(([num, label, href]) => { %>
+        <a href="<%= href %>" class="m-sheet-item group flex items-baseline gap-5 py-4 border-b border-white/10">
+          <span class="font-ui text-[11px] tracking-[2px] text-white/60 tabular-nums w-5"><%= num %></span>
+          <span class="font-display text-[40px] leading-none font-light group-active:text-cherry-light transition-colors"><%= label %></span>
+          <span class="ml-auto self-center font-ui text-white/60 m-arrow" aria-hidden="true">→</span>
+        </a>
+      <% }) %>
+      <a href="/cart" class="m-sheet-item group flex items-baseline gap-5 py-4 border-b border-white/10">
+        <span class="font-ui text-[11px] tracking-[2px] text-white/60 tabular-nums w-5">04</span>
+        <span class="font-display text-[40px] leading-none font-light group-active:text-cherry-light transition-colors">購物車</span>
+        <span id="mobile-cart-count" class="ml-auto self-center font-ui text-[12px] text-white/70 tabular-nums"></span>
+      </a>
+    </nav>
+
+    <!-- Account：由 header-init.js 依登入狀態填入 -->
+    <div id="mobile-account" class="m-sheet-item mt-10">
+      <a href="/login" class="m-fill flex items-center justify-center h-12 w-full bg-cherry text-white font-ui text-[14px] font-medium tracking-[1px]"
+         style="--m-fill: var(--color-cherry-press)">登入 / 註冊</a>
+    </div>
+
+    <p class="m-sheet-item mt-auto pt-12 font-ui text-[11px] tracking-[2px] text-white/60">
+      免費包裝 · 當日配送 · 全台寄送
+    </p>
+  </div>
+</div>

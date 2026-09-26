@@ -1,11 +1,11 @@
-<div id="app">
+<div id="app" v-cloak>
   <div class="min-h-[calc(100vh-144px)] flex items-center justify-center px-4 py-16">
-    <div class="w-full max-w-md">
+    <div class="m-stagger w-full max-w-md">
 
       <!-- Logo mark -->
       <div class="text-center mb-10">
         <h1 class="font-display text-[44px] font-light text-ink-900 leading-none mb-1">花漾生活</h1>
-        <p class="font-ui text-overline text-ink-400">BLOOM</p>
+        <p class="font-ui text-overline text-ink-500">BLOOM</p>
       </div>
 
       <!-- Tabs -->
@@ -13,35 +13,35 @@
         <button
           @click="activeTab = 'login'; errors = {}"
           class="flex-1 pb-3 font-ui text-[13px] font-medium transition-colors relative"
-          :class="activeTab === 'login' ? 'text-ink-900' : 'text-ink-400 hover:text-ink-600'"
+          :class="activeTab === 'login' ? 'text-ink-900' : 'text-ink-500 hover:text-ink-600'"
         >
           登入
           <span v-if="activeTab === 'login'"
-                class="absolute bottom-0 left-0 right-0 h-[2px] bg-cherry"></span>
+                class="m-seam absolute bottom-0 left-0 right-0 h-[2px] bg-cherry"></span>
         </button>
         <button
           @click="activeTab = 'register'; errors = {}"
           class="flex-1 pb-3 font-ui text-[13px] font-medium transition-colors relative"
-          :class="activeTab === 'register' ? 'text-ink-900' : 'text-ink-400 hover:text-ink-600'"
+          :class="activeTab === 'register' ? 'text-ink-900' : 'text-ink-500 hover:text-ink-600'"
         >
           註冊
           <span v-if="activeTab === 'register'"
-                class="absolute bottom-0 left-0 right-0 h-[2px] bg-cherry"></span>
+                class="m-seam absolute bottom-0 left-0 right-0 h-[2px] bg-cherry"></span>
         </button>
       </div>
 
       <!-- Login Form -->
-      <form v-if="activeTab === 'login'" @submit.prevent="handleLogin" class="space-y-5">
+      <form v-if="activeTab === 'login'" @submit.prevent="handleLogin" class="m-enter space-y-5" style="--i:2">
         <div>
           <label class="block font-ui text-[12px] font-medium text-ink-900 mb-2">Email</label>
           <input
             v-model="loginForm.email"
             type="email"
             placeholder="請輸入 Email"
-            class="w-full border border-line-soft bg-bg-paper px-4 h-11 font-ui text-[14px] text-ink-900 placeholder:text-ink-400 focus:outline-none focus:border-ink-900 transition-colors"
+            class="w-full border border-line-soft bg-bg-paper px-4 h-11 font-ui text-[14px] text-ink-900 placeholder:text-ink-500 focus:outline-none focus:border-ink-900 transition-colors"
             :class="{ 'border-error': errors.email }"
           />
-          <p v-if="errors.email" class="font-ui text-[12px] text-error mt-1.5">{{ errors.email }}</p>
+          <p v-if="errors.email" class="font-ui text-[12px] text-error-ink mt-1.5">{{ errors.email }}</p>
         </div>
 
         <div>
@@ -50,33 +50,33 @@
             v-model="loginForm.password"
             type="password"
             placeholder="請輸入密碼"
-            class="w-full border border-line-soft bg-bg-paper px-4 h-11 font-ui text-[14px] text-ink-900 placeholder:text-ink-400 focus:outline-none focus:border-ink-900 transition-colors"
+            class="w-full border border-line-soft bg-bg-paper px-4 h-11 font-ui text-[14px] text-ink-900 placeholder:text-ink-500 focus:outline-none focus:border-ink-900 transition-colors"
             :class="{ 'border-error': errors.password }"
           />
-          <p v-if="errors.password" class="font-ui text-[12px] text-error mt-1.5">{{ errors.password }}</p>
+          <p v-if="errors.password" class="font-ui text-[12px] text-error-ink mt-1.5">{{ errors.password }}</p>
         </div>
 
         <button
           type="submit"
           :disabled="submitting"
-          class="w-full h-12 font-ui text-[13px] font-medium tracking-[1px] bg-cherry text-white hover:bg-cherry-press transition-colors duration-150 disabled:opacity-40 disabled:cursor-not-allowed mt-2"
+          class="m-fill w-full h-12 font-ui text-[13px] font-medium tracking-[1px] bg-cherry text-white transition-colors duration-150 disabled:opacity-40 disabled:cursor-not-allowed mt-2"
         >
           {{ submitting ? '登入中...' : '登入' }}
         </button>
       </form>
 
       <!-- Register Form -->
-      <form v-else @submit.prevent="handleRegister" class="space-y-5">
+      <form v-else @submit.prevent="handleRegister" class="m-enter space-y-5" style="--i:2">
         <div>
           <label class="block font-ui text-[12px] font-medium text-ink-900 mb-2">姓名</label>
           <input
             v-model="registerForm.name"
             type="text"
             placeholder="請輸入姓名"
-            class="w-full border border-line-soft bg-bg-paper px-4 h-11 font-ui text-[14px] text-ink-900 placeholder:text-ink-400 focus:outline-none focus:border-ink-900 transition-colors"
+            class="w-full border border-line-soft bg-bg-paper px-4 h-11 font-ui text-[14px] text-ink-900 placeholder:text-ink-500 focus:outline-none focus:border-ink-900 transition-colors"
             :class="{ 'border-error': errors.name }"
           />
-          <p v-if="errors.name" class="font-ui text-[12px] text-error mt-1.5">{{ errors.name }}</p>
+          <p v-if="errors.name" class="font-ui text-[12px] text-error-ink mt-1.5">{{ errors.name }}</p>
         </div>
 
         <div>
@@ -85,10 +85,10 @@
             v-model="registerForm.email"
             type="email"
             placeholder="請輸入 Email"
-            class="w-full border border-line-soft bg-bg-paper px-4 h-11 font-ui text-[14px] text-ink-900 placeholder:text-ink-400 focus:outline-none focus:border-ink-900 transition-colors"
+            class="w-full border border-line-soft bg-bg-paper px-4 h-11 font-ui text-[14px] text-ink-900 placeholder:text-ink-500 focus:outline-none focus:border-ink-900 transition-colors"
             :class="{ 'border-error': errors.email }"
           />
-          <p v-if="errors.email" class="font-ui text-[12px] text-error mt-1.5">{{ errors.email }}</p>
+          <p v-if="errors.email" class="font-ui text-[12px] text-error-ink mt-1.5">{{ errors.email }}</p>
         </div>
 
         <div>
@@ -97,16 +97,16 @@
             v-model="registerForm.password"
             type="password"
             placeholder="至少 6 個字元"
-            class="w-full border border-line-soft bg-bg-paper px-4 h-11 font-ui text-[14px] text-ink-900 placeholder:text-ink-400 focus:outline-none focus:border-ink-900 transition-colors"
+            class="w-full border border-line-soft bg-bg-paper px-4 h-11 font-ui text-[14px] text-ink-900 placeholder:text-ink-500 focus:outline-none focus:border-ink-900 transition-colors"
             :class="{ 'border-error': errors.password }"
           />
-          <p v-if="errors.password" class="font-ui text-[12px] text-error mt-1.5">{{ errors.password }}</p>
+          <p v-if="errors.password" class="font-ui text-[12px] text-error-ink mt-1.5">{{ errors.password }}</p>
         </div>
 
         <button
           type="submit"
           :disabled="submitting"
-          class="w-full h-12 font-ui text-[13px] font-medium tracking-[1px] bg-cherry text-white hover:bg-cherry-press transition-colors duration-150 disabled:opacity-40 disabled:cursor-not-allowed mt-2"
+          class="m-fill w-full h-12 font-ui text-[13px] font-medium tracking-[1px] bg-cherry text-white transition-colors duration-150 disabled:opacity-40 disabled:cursor-not-allowed mt-2"
         >
           {{ submitting ? '註冊中...' : '註冊' }}
         </button>
